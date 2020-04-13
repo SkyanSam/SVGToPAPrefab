@@ -5,6 +5,7 @@ using PA_PrefabBuilder;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Xml;
+using System.Linq;
 
 namespace ConsoleApp1
 {
@@ -13,7 +14,7 @@ namespace ConsoleApp1
         public static string prefabName = "Prefab Generated From SVG";
         public static PrefabType prefabType = PrefabType.Misc1;
         public static float secondsToLast = 15f;
-        public static string svgPath = @"D:/Documents/CSharpProjects/AbandonedBossStretch.svg";
+        public static string svgPath = @"D:/Documents/CSharpProjects/AbandonedBoss.svg";
         public static string prefabPath = @"C:\Program Files (x86)\Steam\steamapps\common\Project Arrhythmia\beatmaps\prefabs";
     }
     class Colors {
@@ -21,8 +22,8 @@ namespace ConsoleApp1
          * NOTE: Need to be careful. Not sure if svg also used hex or hsv. May need to convert later */
         public static string[] ids = new string[10]
         {
-        "rgb(0,0,0)",
-        "rgb(0,0,0)",
+        "rgb(255,153,0)",
+        "rgb(0,51,0)",
         "rgb(0,0,0)",
         "rgb(0,0,0)",
         "rgb(0,0,0)",
@@ -36,7 +37,8 @@ namespace ConsoleApp1
     class GameObjectData
     {
         public int ID;
-        public Shapes shape;
+        public int shapeVariant; // Fill is 0, stroke is 1
+        public Shapes? shape;
         public float positionX;
         public float positionY;
         public float sizeX;
@@ -44,7 +46,7 @@ namespace ConsoleApp1
         public float offsetX;
         public float offsetY;
         public float rotAngle;
-        public int colorNum;
+        public int colorNum = 0;
         public GameObjectData()
         {
 
@@ -56,7 +58,11 @@ namespace ConsoleApp1
         }
         public GameObject ToObj()
         {
-            GameObject obj = new GameObject(ID.ToString(),"GameObject" + ID, shape);
+            string objname = "GmObj" + ID;
+            if (shape != null) objname += " " + shape.Value;
+
+            GameObject obj = new GameObject(ID.ToString(), objname, shape.Value);
+            obj.ShapeVariant = shapeVariant;
             // Because pivot is top left corner
             obj.OffsetX = offsetX;
             obj.OffsetY = offsetY;
@@ -69,12 +75,16 @@ namespace ConsoleApp1
             // Animation / Making sure the object lasts
             // 
             //Event e = new Event(EventType.col, UserOptions.secondsToLast);
-            
-            obj.AddEvent(EventType.col, UserOptions.secondsToLast, colorNum, null, Easing.Linear);
-            return obj.Clone();
+            GameObject deepObj = obj.Clone();
+            deepObj.AddEvent(EventType.col, UserOptions.secondsToLast, colorNum, null, Easing.Linear);
+            return deepObj;
         }
         public override string ToString()
         {
+            string printShape;
+            if (shape == null) printShape = null;
+            else printShape = shape.Value.ToString();
+
             base.ToString();
             return
                 base.ToString() +
@@ -87,7 +97,8 @@ namespace ConsoleApp1
                 "offsetY: " + offsetY + ", " +
                 "ang: " + rotAngle + ", " +
                 "color: " + colorNum + ", " +
-                "shape: " + shape.ToString();
+                "shape: " + printShape + ", " +
+                "variant: " + shapeVariant;
 
              ;
         }
@@ -112,8 +123,11 @@ namespace ConsoleApp1
             PrefabBuilder pb = new PrefabBuilder(UserOptions.prefabName, UserOptions.prefabType, 0);
             for (int i = 0; i < objects.Length; i++)
             {
-                objects[i].Bin = i; // This may be a problem if I > 14.
-                pb.Objects.Add(objects[i]);
+                if (objects[i] != null)
+                {
+                    objects[i].Bin = i; // This may be a problem if I > 14.
+                    pb.Objects.Add(objects[i]);
+                }
             }
 
             // Prefab -> Project Arrythmia!!
@@ -173,7 +187,7 @@ namespace ConsoleApp1
                         gameObjectsData.Add(new GameObjectData()
                         {
                             ID = GenerateID(999),
-                            shape = GetVarFromValue.Shape(currentType),
+                            shape = null,
                             offsetX = offsetVect[0],
                             offsetY = offsetVect[1]
                         });
@@ -198,18 +212,7 @@ namespace ConsoleApp1
                             if (IsItemIsInArray(value, GameObjectData.varLabels, out j)) nextValf = float.Parse(nextVal);
 
                             // Different Objects
-                            if (currentType == "rect")
-                            {
-                                AddValToData.Square(ref obj, value, nextVal, nextValf);
-                            }
-                            else if (currentType == "circle")
-                            {
-                                AddValToData.Circle(ref obj, value, nextVal, nextValf);
-                            }
-                            else if (currentType == "ellipse")
-                            {
-                                AddValToData.Ellipse(ref obj, value, nextVal, nextValf);
-                            }
+                            AddValToData.General(ref obj, value, nextVal, nextValf);
                             gameObjectsData[cItem] = obj;
                         }
 
@@ -217,6 +220,16 @@ namespace ConsoleApp1
 
                     if (objectStarted && tokenTypes[i].ToString() == "EndObject")
                     {
+                        var thisObj = (GameObjectData)gameObjectsData[cItem];
+                        if (thisObj.shape == null) thisObj.shape = GetVarFromValue.Shape(currentType);
+                        
+                        float[] offsetVect = GetVarFromValue.Offset(currentType);
+                        thisObj.offsetX = offsetVect[0];
+                        thisObj.offsetY = offsetVect[1];
+
+                        gameObjectsData[cItem] = thisObj;
+
+
                         // We're not resetting current type because of JSON output.
                         objectStarted = false;
                         Console.WriteLine("END OBJECT!! type:{0}, objectstarted:{1}", currentType, objectStarted);
@@ -230,7 +243,8 @@ namespace ConsoleApp1
             GameObject[] gameObjects = new GameObject[dataList.Count];
             for (int i = 0; i < gameObjects.Length; i++)
             {
-                gameObjects[i] = ((GameObjectData)dataList[i]).ToObj();
+                if (((GameObjectData)dataList[i]).shape != null) // We don't want to add a shape we can't even determine!
+                    gameObjects[i] = ((GameObjectData)dataList[i]).ToObj();
             }
             return gameObjects;
         }
@@ -270,7 +284,7 @@ namespace ConsoleApp1
         }
         public struct GetVarFromValue
         {
-            public static Shapes Shape(string value)
+            public static Shapes? Shape(string value)
             {
                 switch (value)
                 {
@@ -281,116 +295,150 @@ namespace ConsoleApp1
                     case "ellipse":
                         return Shapes.Circle;
                 }
-                return Shapes.Hexagon; // idk what to return by default lol
+                return null;
             }
             public static float[] Offset(string value)
             {
                 // Center Pivot
-                if (IsItemIsInArray(value, new string[] { "circle", "ellipse" }))
+                if (IsItemIsInArray(value, new string[] { "circle", "ellipse", "path" }))
                     return new float[] { 0f, 0f };
 
                 // Top Right Pivot
                 else
-                    return new float[] { -0.5f, -0.5f };
+                    return new float[] { 0.5f, -0.5f };
 
             }
         }
         struct AddValToData
         {
-            public static void Square(ref GameObjectData obj, string value, string nextVal, float nextValf)
+            public static void General(ref GameObjectData obj, string value, string nextVal, float nextValf)
             {
-                switch (value)
+                Shapes? shape = null;
+                if (IsItemIsInArray(value, new string[] { "@d" })) AddVarToData.D(ref obj, nextVal, out shape);
+                if (shape != null) obj.shape = shape.Value;
+
+                if (IsItemIsInArray(value, new string[] { "@x", "@cx" })) AddVarToData.X(ref obj, nextValf);
+                if (IsItemIsInArray(value, new string[] { "@y", "@cy" })) AddVarToData.Y(ref obj, nextValf);
+                if (IsItemIsInArray(value, new string[] { "@width", "@rx" })) AddVarToData.sizeX(ref obj, nextValf);
+                if (IsItemIsInArray(value, new string[] { "@height", "@ry" })) AddVarToData.sizeY(ref obj, nextValf);
+                if (IsItemIsInArray(value, new string[] { "@r" })) AddVarToData.size(ref obj, nextValf);
+                if (IsItemIsInArray(value, new string[] { "@fill", "@stroke" })) AddVarToData.fill(ref obj, nextVal);
+                if (IsItemIsInArray(value, new string[] { "@stroke" })) AddVarToData.stroke(ref obj);
+
+
+            }
+        }
+        struct AddVarToData
+        {
+            // Custom Path.
+            public static void D(ref GameObjectData obj, string nextVal, out Shapes? shape)
+            {
+                shape = null;
+                // Splitting the values
+                string[] rawArray = nextVal.Split('M', 'L', 'Z', ' ');
+                ArrayList arraylist = new ArrayList();
+
+                // We dont want to add empty stuff
+                for (int i = 0; i < rawArray.Length; i++)
+                    if (rawArray[i] != "") arraylist.Add(rawArray[i]);
+
+                foreach (var item in arraylist) {
+                    Console.WriteLine("/" + item + "/");
+                }
+
+                // We want to convert the string values to float
+                float[] floatArray = new float[arraylist.Count]; 
+                for (int i = 0; i < arraylist.Count; i++)
+                    floatArray[i] = float.Parse((string)arraylist[i]);
+
+                // Analyze the number of points. We multiply by two because its split up by float, not by vector / float[2] then add two because of [M x y]
+                if (floatArray.Length == (3 * 2)+2) shape = Shapes.Triangle;
+                else if (floatArray.Length == (6 * 2)+2) shape = Shapes.Hexagon;
+
+                Console.WriteLine(floatArray.Length);
+                if (floatArray.Length == 3 * 2) Console.WriteLine("ITS A FUCKING TRIANGLE");
+                // If nothing else we can assume the shape is null.
+
+                // Create float array for x and y.
+                float[] xArray = new float[floatArray.Length / 2];
+                float[] yArray = new float[floatArray.Length / 2];
+                for (int i = 0; i < floatArray.Length; i += 2)
                 {
-                    case "@x":
-                        obj.positionX = nextValf;
-                        break;
+                    xArray[i / 2] = floatArray[i];
+                }
+                for (int[] i = new int[] { 1, 0 }; i[0] < floatArray.Length; i[0] += 2)
+                {
+                    // i[0] is index of floatArray
+                    // i[1] is index of yArray
+                    yArray[i[1]] = floatArray[i[0]];
+                    i[1] += 1;
+                }
 
-                    case "@y":
-                        obj.positionY = nextValf;
-                        break;
+                // Get min and max
+                float[] min = new float[] { xArray.Min(), yArray.Min() };
+                float[] max = new float[] { xArray.Max(), yArray.Max() };
 
-                    case "@width":
-                        obj.sizeX = nextValf;
-                        break;
+                Console.WriteLine("minmax");
+                Console.WriteLine(min[0] + "," + min[1]);
+                Console.WriteLine(max[0] + "," + max[1]);
+                Console.WriteLine("minmax");
+                // Get center and size
+                float[] center = CustomMath.GetCenter(min, max);
+                float[] size = CustomMath.GetSize(min, max);
+                Console.WriteLine(center[0]);
+                Console.WriteLine(center[1]);
+                Console.WriteLine(size[0]);
+                Console.WriteLine(size[1]);
 
-                    case "@height":
-                        obj.sizeY = nextValf;
-                        break;
-
-                    case "@fill":
-                        int id;
-                        if (IsItemIsInArray(nextVal, Colors.ids, out id))
-                        {
-                            obj.colorNum = id; // Affirmative, colors count from 0.
-                        }
-                        break;
-
-                    case "@stroke":
-                        // Will implement this in the future, may be same as fill
-                        break;
+                // Apply center and size
+                obj.positionX = center[0];
+                obj.positionY = center[1];
+                obj.sizeX = size[0];
+                obj.sizeY = size[1];
+            }
+            public static void X(ref GameObjectData obj, float nextValf)
+            {
+                obj.positionX = nextValf;
+            }
+            public static void Y(ref GameObjectData obj, float nextValf)
+            {
+                obj.positionY = nextValf;
+            }
+            public static void sizeX(ref GameObjectData obj, float nextValf)
+            {
+                obj.sizeX = nextValf;
+            }
+            public static void sizeY(ref GameObjectData obj, float nextValf)
+            {
+                obj.sizeY = nextValf;
+            }
+            public static void size(ref GameObjectData obj, float nextValf)
+            {
+                obj.sizeY = obj.sizeX = nextValf*2;
+            }
+            public static void fill(ref GameObjectData obj, string nextVal)
+            {
+                int id;
+                if (IsItemIsInArray(nextVal, Colors.ids, out id))
+                {
+                    obj.colorNum = id; // Affirmative, colors count from 0.
                 }
             }
-            public static void Circle(ref GameObjectData obj, string value, string nextVal, float nextValf)
+            public static void stroke(ref GameObjectData obj)
             {
-                switch (value)
-                {
-                    case "@cx":
-                        obj.positionX = nextValf;
-                        break;
-
-                    case "@cy":
-                        obj.positionY = nextValf;
-                        break;
-
-                    case "@r":
-                        obj.sizeX = obj.sizeY = nextValf;
-                        break;
-
-                    case "@fill":
-                        int id;
-                        if (IsItemIsInArray(nextVal, Colors.ids, out id))
-                        {
-                            obj.colorNum = id; // Affirmative, colors count from 0.
-                        }
-                        break;
-
-                    case "@stroke":
-                        // Will implement this in the future, may be same as fill
-                        break;
-                }
+                obj.shapeVariant = 1;
             }
-            public static void Ellipse(ref GameObjectData obj, string value, string nextVal, float nextValf)
+        }
+        struct CustomMath
+        {
+            public static float[] GetCenter(float[] min, float[] max)
             {
-                switch (value)
-                {
-                    case "@cx":
-                        obj.positionX = nextValf;
-                        break;
-
-                    case "@cy":
-                        obj.positionY = nextValf;
-                        break;
-
-                    case "@rx":
-                        obj.sizeX = nextValf;
-                        break;
-
-                    case "@ry":
-                        obj.sizeY = nextValf;
-                        break;
-
-                    case "@fill":
-                        int id;
-                        if (IsItemIsInArray(nextVal, Colors.ids, out id))
-                        {
-                            obj.colorNum = id; // Affirmative, colors count from 0.
-                        }
-                        break;
-
-                    case "@stroke":
-                        // Will implement this in the future, may be same as fill
-                        break;
-                }
+                return new float[] { (max[0] + min[0])/2f , (max[1] + min[1])/2f};
+            }
+            public static float[] GetSize(float[] min, float[] max)
+            {
+                float[] center = GetCenter(min, max);
+                return new float[] { (max[0] - center[0])*2, (max[1] - center[1])*2};
             }
         }
     }
