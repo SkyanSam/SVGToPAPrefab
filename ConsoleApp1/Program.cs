@@ -149,7 +149,6 @@ namespace ConsoleApp1
             int cItem = -1; // current Item
             string currentType = "";
             bool objectStarted = false;
-            bool reachedClipPath = false;
 
             ArrayList tokenTypes = new ArrayList(); //TokenType
             ArrayList valueTypes = new ArrayList(); //Type?
@@ -172,68 +171,62 @@ namespace ConsoleApp1
             {
 
                 var value = (string)values[i];
+                if (isTypeConvertableToPAObject(value))
+                    currentType = value;
 
-                if (!reachedClipPath && value == "@clip-path")
-                    reachedClipPath = true;
-                if (reachedClipPath)
+                if (!objectStarted && tokenTypes[i].ToString() == "StartObject")
                 {
-                    if (isTypeConvertableToPAObject(value))
-                        currentType = value;
-
-                    if (!objectStarted && tokenTypes[i].ToString() == "StartObject")
+                    objectStarted = true;
+                    float[] offsetVect = GetVarFromValue.Offset(currentType);
+                    gameObjectsData.Add(new GameObjectData()
                     {
-                        objectStarted = true;
-                        float[] offsetVect = GetVarFromValue.Offset(currentType);
-                        gameObjectsData.Add(new GameObjectData()
-                        {
-                            ID = GenerateID(999),
-                            shape = null,
-                            offsetX = offsetVect[0],
-                            offsetY = offsetVect[1]
-                        });
-                        Console.WriteLine("NEW OBJECT!! value:{0}, objstarted: {1}", currentType, objectStarted);
+                        ID = GenerateID(999),
+                        shape = null,
+                        offsetX = offsetVect[0],
+                        offsetY = offsetVect[1]
+                    });
+                    Console.WriteLine("NEW OBJECT!! value:{0}, objstarted: {1}", currentType, objectStarted);
 
-                        cItem += 1;
-                        Console.WriteLine("CITEM: " + cItem);
+                    cItem += 1;
+                    Console.WriteLine("CITEM: " + cItem);
+                }
+
+
+                if (currentType != "" && objectStarted)
+                {
+                    // Initializing Object Data
+                    string nextVal = (string)values[i + 1];
+                    if (nextVal != null)
+                    {
+                        GameObjectData obj = (GameObjectData)gameObjectsData[cItem];
+                        float nextValf = 0.0f;
+                        int j;
+
+                        // This is to see if the item is any of the following cases to see if the nextVal is a float or not.
+                        if (IsItemIsInArray(value, GameObjectData.varLabels, out j)) nextValf = float.Parse(nextVal);
+
+                        // Different Objects
+                        AddValToData.General(ref obj, value, nextVal, nextValf);
+                        gameObjectsData[cItem] = obj;
                     }
 
+                }
 
-                    if (currentType != "" && objectStarted)
-                    {
-                        // Initializing Object Data
-                        string nextVal = (string)values[i + 1];
-                        if (nextVal != null)
-                        {
-                            GameObjectData obj = (GameObjectData)gameObjectsData[cItem];
-                            float nextValf = 0.0f;
-                            int j;
-
-                            // This is to see if the item is any of the following cases to see if the nextVal is a float or not.
-                            if (IsItemIsInArray(value, GameObjectData.varLabels, out j)) nextValf = float.Parse(nextVal);
-
-                            // Different Objects
-                            AddValToData.General(ref obj, value, nextVal, nextValf);
-                            gameObjectsData[cItem] = obj;
-                        }
-
-                    }
-
-                    if (objectStarted && tokenTypes[i].ToString() == "EndObject")
-                    {
-                        var thisObj = (GameObjectData)gameObjectsData[cItem];
-                        if (thisObj.shape == null) thisObj.shape = GetVarFromValue.Shape(currentType);
+                if (objectStarted && tokenTypes[i].ToString() == "EndObject")
+                {
+                    var thisObj = (GameObjectData)gameObjectsData[cItem];
+                    if (thisObj.shape == null) thisObj.shape = GetVarFromValue.Shape(currentType);
                         
-                        float[] offsetVect = GetVarFromValue.Offset(currentType);
-                        thisObj.offsetX = offsetVect[0];
-                        thisObj.offsetY = offsetVect[1];
+                    float[] offsetVect = GetVarFromValue.Offset(currentType);
+                    thisObj.offsetX = offsetVect[0];
+                    thisObj.offsetY = offsetVect[1];
 
-                        gameObjectsData[cItem] = thisObj;
+                    gameObjectsData[cItem] = thisObj;
 
 
-                        // We're not resetting current type because of JSON output.
-                        objectStarted = false;
-                        Console.WriteLine("END OBJECT!! type:{0}, objectstarted:{1}", currentType, objectStarted);
-                    }
+                    // We're not resetting current type because of JSON output.
+                    objectStarted = false;
+                    Console.WriteLine("END OBJECT!! type:{0}, objectstarted:{1}", currentType, objectStarted);
                 }
             }
             return gameObjectsData;
