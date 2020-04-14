@@ -15,7 +15,7 @@ namespace ConsoleApp1
         public static string prefabName = "Prefab Generated From SVG";
         public static PrefabType prefabType = PrefabType.Misc1;
         public static float secondsToLast = 15f;
-        public static string svgPath = @"D:/Documents/CSharpProjects/RotatedHell.svg";
+        public static string svgPath = @"D:/Documents/CSharpProjects/MatrixTest2.svg";
         public static string prefabPath = @"C:\Program Files (x86)\Steam\steamapps\common\Project Arrhythmia\beatmaps\prefabs";
     }
     class Colors {
@@ -182,7 +182,7 @@ namespace ConsoleApp1
                     gameObjectsData.Add(new GameObjectData()
                     {
                         ID = GenerateID(999),
-                        shape = null,
+                        shape = GetVarFromValue.Shape(currentType),
                         offsetX = offsetVect[0],
                         offsetY = offsetVect[1]
                     });
@@ -216,12 +216,14 @@ namespace ConsoleApp1
                 if (objectStarted && tokenTypes[i].ToString() == "EndObject")
                 {
                     var thisObj = (GameObjectData)gameObjectsData[cItem];
-                    if (thisObj.shape == null) thisObj.shape = GetVarFromValue.Shape(currentType);
-                        
-                    float[] offsetVect = GetVarFromValue.Offset(currentType);
-                    thisObj.offsetX = offsetVect[0];
-                    thisObj.offsetY = offsetVect[1];
-
+                    if (thisObj.shape == null)
+                    {
+                        thisObj.shape = GetVarFromValue.Shape(currentType);
+                        float[] offsetVect = GetVarFromValue.Offset(currentType);
+                        thisObj.offsetX = offsetVect[0];
+                        thisObj.offsetY = offsetVect[1];
+                        Console.WriteLine("OFFEST IS BEING CALLED");
+                    }
                     gameObjectsData[cItem] = thisObj;
 
 
@@ -313,13 +315,12 @@ namespace ConsoleApp1
 
                 if (IsItemIsInArray(value, new string[] { "@x", "@cx" })) AddVarToData.X(ref obj, nextValf);
                 if (IsItemIsInArray(value, new string[] { "@y", "@cy" })) AddVarToData.Y(ref obj, nextValf);
-                if (IsItemIsInArray(value, new string[] { "@width", "@rx" })) AddVarToData.sizeX(ref obj, nextValf);
-                if (IsItemIsInArray(value, new string[] { "@height", "@ry" })) AddVarToData.sizeY(ref obj, nextValf);
+                if (IsItemIsInArray(value, new string[] { "@width", "@rx" })) AddVarToData.sizeX(ref obj, nextValf, value);
+                if (IsItemIsInArray(value, new string[] { "@height", "@ry" })) AddVarToData.sizeY(ref obj, nextValf, value);
+                if (IsItemIsInArray(value, new string[] { "@transform" })) AddVarToData.translate(ref obj, nextVal);
                 if (IsItemIsInArray(value, new string[] { "@r" })) AddVarToData.size(ref obj, nextValf);
                 if (IsItemIsInArray(value, new string[] { "@fill", "@stroke" })) AddVarToData.fill(ref obj, nextVal);
                 if (IsItemIsInArray(value, new string[] { "@stroke" })) AddVarToData.stroke(ref obj);
-
-
             }
         }
         struct AddVarToData
@@ -392,8 +393,14 @@ namespace ConsoleApp1
                     points[i] = new Vector2(xArray[i], yArray[i]);
                 }
 
+                float SizeMultiplier = 1;
+
                 // Analyze the number of points. We multiply by two because its split up by float, not by vector / float[2] then add two because of [M x y]
-                if (points.Length == 3) shape = Shapes.Triangle;
+                if (points.Length == 3) { 
+                    shape = Shapes.Triangle;
+                    SizeMultiplier = 2;
+                }
+
                 else if (points.Length == 4) shape = Shapes.Square;
                 else if (points.Length == 6) shape = Shapes.Hexagon;
 
@@ -430,8 +437,8 @@ namespace ConsoleApp1
                 // Apply center and size
                 obj.positionX = center[0];
                 obj.positionY = center[1];
-                obj.sizeX = finalSize[0];
-                obj.sizeY = finalSize[1];
+                obj.sizeX = finalSize[0] * SizeMultiplier;
+                obj.sizeY = finalSize[1] * SizeMultiplier;
                 obj.rotAngle = finalRotation;
             }
             public static void X(ref GameObjectData obj, float nextValf)
@@ -442,13 +449,17 @@ namespace ConsoleApp1
             {
                 obj.positionY = nextValf;
             }
-            public static void sizeX(ref GameObjectData obj, float nextValf)
+            public static void sizeX(ref GameObjectData obj, float nextValf, string value)
             {
-                obj.sizeX = nextValf;
+                int multiplier = 1;
+                if (value == "@rx") multiplier = 2; // If this is an ellipse we want twice as much
+                obj.sizeX = nextValf * multiplier;
             }
-            public static void sizeY(ref GameObjectData obj, float nextValf)
+            public static void sizeY(ref GameObjectData obj, float nextValf, string value)
             {
-                obj.sizeY = nextValf;
+                int multiplier = 1;
+                if (value == "@ry") multiplier = 2; // If this is an ellipse we want twice as much
+                obj.sizeY = nextValf * multiplier;
             }
             public static void size(ref GameObjectData obj, float nextValf)
             {
@@ -465,6 +476,38 @@ namespace ConsoleApp1
             public static void stroke(ref GameObjectData obj)
             {
                 obj.shapeVariant = 1;
+            }
+            public static void rotation(ref GameObjectData obj, float nextValf)
+            {
+                obj.rotAngle = nextValf;
+            }
+            public static void matrix(ref GameObjectData obj, string nextVal)
+            {
+                
+            }
+            public static void translate(ref GameObjectData obj, string nextVal)
+            {
+                string[] vals = nextVal.Split('(', ')', ','); // Questioning if i should split for empty spaces..
+                if (vals[0] == "matrix")
+                {
+                    float[] matrix = new float[vals.Length - 1];
+
+                    for (int i = 1; i < vals.Length - 1; i++)
+                    {
+                        matrix[i - 1] = float.Parse(vals[i]);
+                    }
+                    float posXdelta;
+                    float posYdelta;
+                    float sizeX; // Not valid at this point I think
+                    float sizeY; // Not valid at this point I think
+                    float rotation;
+                    CustomConversions.GetVarsFromMatrix(matrix, out posXdelta, out posYdelta, out sizeX, out sizeY, out rotation);
+                    obj.offsetX = 0;
+                    obj.offsetY = 0;
+                    obj.positionX += 0.5f;
+                    obj.rotAngle = rotation;
+                    // I NEED TO MAKE THE OFFSET CENTER AND THEN PUSH EVERYTHING BY 0.5
+                }
             }
         }
         struct CustomMath
@@ -511,6 +554,16 @@ namespace ConsoleApp1
 
                 return rFloatArray;
             }
+            public static void GetVarsFromMatrix(float[] matrix, out float posXdelta, out float posYdelta, out float sizeX, out float sizeY, out float rot)
+            {
+                posXdelta = matrix[4];
+                posYdelta = matrix[5];
+                sizeX = matrix[0];
+                sizeY = matrix[3];
+                var skewX = matrix[1];
+                var skewY = matrix[2];
+                rot = MathF.Asin(skewY) * 180 / MathF.PI;
+            }
         }
         public static void GetRotatedShape(float rotDegDiff, Vector2 center, Vector2[] points, out Vector2[] RotatedPointsOut, out float finalRotation)
         {
@@ -522,7 +575,7 @@ namespace ConsoleApp1
             var rotRadDiff = rotDegDiff * (MathF.PI / 180); // Converting deg -> rad
             for (int v = 0; v < points.Length; v++) points[v] -= center; // Subtracting the diff so we can rotate around the center.
 
-            for (float r = -(MathF.PI * 2); r < MathF.PI * 2; r += rotRadDiff) // questioning if we should do -360 -> 360 or -360 -> 0
+            for (float r = 0; r < (MathF.PI * 2); r += rotRadDiff) // questioning if we should do -360 -> 360 or -360 -> 0
             {
                 Vector2[] rotatedPoints;
                 CustomMath.RotatePtsAroundOrigin.AntiClockwise(r, points, out rotatedPoints);
@@ -532,7 +585,7 @@ namespace ConsoleApp1
                     // We want the base line to be on the x axis.
                     var absDist = MathF.Abs(rotatedPoints[i].Y - rotatedPoints[i - 1].Y);
                     // Comparing it to the deadzone.
-                    if (absDist < 0.5f && rotatedPoints[i].Y > 0) // We want it to be the lowest line below everything. (closest to width)
+                    if (absDist < 0.1f && rotatedPoints[i].Y > 0) // We want it to be the lowest line below everything. (closest to width)
                     { 
                         // If this is a triangle
                         if (points.Length == 3)
@@ -540,7 +593,7 @@ namespace ConsoleApp1
                             Vector2 otherpoint = points[0];
                             if (i == 1) otherpoint = points[2];
                             if (i == 2) otherpoint = points[0];
-                            if (MathF.Abs(otherpoint.X) > 1)
+                            if (MathF.Abs(otherpoint.X) < 1)
                             {
                                 // We dont want to continue if the top point of the triangle isnt close to the center.
                                 // I'll consider a function to analyze the other part of the triangle to see if its a right triangle later.
@@ -550,7 +603,7 @@ namespace ConsoleApp1
 
                         // If we got this far we can assume this is the correct rotation and points
                         RotatedPointsOut = rotatedPoints;
-                        finalRotation = -r / (MathF.PI / 180);
+                        finalRotation = r * (180 / MathF.PI); // Converting rad to deg
                     }
 
                 }
