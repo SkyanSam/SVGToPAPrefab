@@ -26,3 +26,4 @@ D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\Co
 D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
 D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\PrefabBuilder.dll
 D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\ConsoleApp1.csproj.CopyComplete
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\ConsoleApp1.genruntimeconfig.cache

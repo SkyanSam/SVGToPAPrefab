@@ -69,7 +69,7 @@ namespace SVGToPrefab.Custom
                                 Vector2 otherpoint = points[0];
                                 if (i == 1) otherpoint = points[2];
                                 if (i == 2) otherpoint = points[0];
-                                if (MathF.Abs(otherpoint.X) < 1)
+                                if (MathF.Abs(otherpoint.X) > 1 / Input.sizeMultiplier)
                                 {
                                     // We dont want to continue if the top point of the triangle isnt close to the center.
                                     // I'll consider a function to analyze the other part of the triangle to see if its a right triangle later.
