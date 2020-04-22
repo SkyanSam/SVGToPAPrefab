@@ -32,6 +32,7 @@ namespace SVGToPrefab
                 if (objects[i] != null)
                 {
                     objects[i].Bin = i; // This may be a problem if I > 14.
+                    // (objects[i].renderDistance) need to add render distance.
                     pb.Objects.Add(objects[i]);
                 }
             }
@@ -52,6 +53,7 @@ namespace SVGToPrefab
         static ArrayList JSONToGameObjectData(string json)
         {
             ArrayList gameObjectsData = new ArrayList();
+            ArrayList pathOutlinesData = new ArrayList();
             int cItem = -1; // current Item
             string currentType = "";
             bool objectStarted = false;
@@ -137,9 +139,17 @@ namespace SVGToPrefab
                     Console.WriteLine("END OBJECT!! type:{0}, objectstarted:{1}", currentType, objectStarted);
                 }
             }
+
+            // Converting Path Outline to GameObjects.
+            for (int i = 0; i < pathOutlinesData.Count; i++)
+            {
+                GameObjectData[] pathobjs = (pathOutlinesData[i] as PathOutline).ToObjs();
+                for (int g = 0; g < pathobjs.Length; i++) gameObjectsData.Add(pathobjs[i]);
+            }
+            
             return gameObjectsData;
         }
-        static GameObject[] ConvertDataListToGameObjects(ArrayList dataList)
+        public static GameObject[] ConvertDataListToGameObjects(ArrayList dataList)
         {
             GameObject[] gameObjects = new GameObject[dataList.Count];
             for (int i = 0; i < gameObjects.Length; i++)
@@ -149,12 +159,12 @@ namespace SVGToPrefab
             }
             return gameObjects;
         }
-        static int GenerateID(int maxNum)
+        public static int GenerateID(int maxNum)
         {
             Random random = new Random();
             return random.Next(maxNum);
         }
-        static bool isTypeConvertableToPAObject(string Value)
+        public static bool isTypeConvertableToPAObject(string Value)
         {
             return
                 Value == "rect" ||

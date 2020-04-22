@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Numerics;
+using PA_PrefabBuilder;
 
 namespace SVGToPrefab.Custom
 {
-    struct CustomMath
+    static class CustomMath
     {
         public static float[] GetCenter(float[] min, float[] max)
         {
@@ -17,8 +18,23 @@ namespace SVGToPrefab.Custom
             float[] center = GetCenter(min, max);
             return new float[] { (max[0] - center[0]) * 2, (max[1] - center[1]) * 2 };
         }
+        public static Vector2 Normalize(this Vector2 vect)
+        {
+            return vect / vect.Magnitude();
+        }
+        public static float Magnitude(this Vector2 vect)
+        {
+            return (vect.X*vect.X) + (vect.Y*vect.Y);
+        }
         public struct Rotations
         {
+            // https://stackoverflow.com/questions/17530169/get-angle-between-point-and-origin [Too lazy to figure out on my own]
+            public static float GetRotationFromVector(Vector2 center, Vector2 target)
+            {
+                Vector2 vector2 = target - center;
+                double n = 360f - (Math.Atan2(center.Y - target.Y, center.X - target.X) * 180 / Math.PI);
+                return (float)n % 360f;
+            }
             ///<summary>
             ///Rotates points anti clockwise around the origin.
             ///</summary>
@@ -41,11 +57,12 @@ namespace SVGToPrefab.Custom
             /// <param name="points">Point Values</param>
             /// <param name="RotatedPointsOut">Points Output</param>
             /// <param name="finalRotation">Rotation Output</param>
-            public static void GetRotatedShape(float rotDegDiff, Vector2 center, Vector2[] points, out Vector2[] RotatedPointsOut, out float finalRotation)
+            public static void GetRotatedShape(float rotDegDiff, Vector2 center, Vector2[] points, out Vector2[] RotatedPointsOut, out float finalRotation, out bool isRightTriangle)
             {
                 // Default Values.
                 finalRotation = 0;
                 RotatedPointsOut = points;
+                isRightTriangle = false;
                 //
 
                 var rotRadDiff = rotDegDiff * (MathF.PI / 180); // ConD:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\Program.csverting deg -> rad
@@ -59,22 +76,44 @@ namespace SVGToPrefab.Custom
                     for (int i = 1; i < rotatedPoints.Length; i++)
                     {
                         // We want the base line to be on the x axis.
-                        var absDist = MathF.Abs(rotatedPoints[i].Y - rotatedPoints[i - 1].Y);
+                        var y_absDist = MathF.Abs(rotatedPoints[i].Y - rotatedPoints[i - 1].Y);
+                        
                         // Comparing it to the deadzone.
-                        if (absDist < 0.1f && rotatedPoints[i].Y > 0) // We want it to be the lowest line below everything. (closest to width)
+                        if (y_absDist < 0.1f && rotatedPoints[i].Y > 0) // We want it to be the lowest line below everything. (closest to width)
                         {
                             // If this is a triangle
                             if (points.Length == 3)
                             {
-                                Vector2 otherpoint = points[0];
-                                if (i == 1) otherpoint = points[2];
-                                if (i == 2) otherpoint = points[0];
-                                if (MathF.Abs(otherpoint.X) > 1 / Input.sizeMultiplier)
+                                Vector2 toppoint = points[0];
+                                if (i == 1) toppoint = points[2];
+                                if (i == 2) toppoint = points[0];
+
+                                // We want to continue if the top point of the triangle is close to the center, or its a right triangle.
+
+                                #region Isosoles Check
+                                if (MathF.Abs(toppoint.X) < 1 / Input.sizeMultiplier)
                                 {
-                                    // We dont want to continue if the top point of the triangle isnt close to the center.
-                                    // I'll consider a function to analyze the other part of the triangle to see if its a right triangle later.
                                     continue;
                                 }
+                                #endregion
+
+                                #region Right Triangle Check
+
+                                // Get the bottom left corner of the triangle
+                                Vector2 bottomleftcorner;
+                                if (rotatedPoints[i].X < rotatedPoints[i - 1].X) bottomleftcorner = rotatedPoints[i];
+                                else bottomleftcorner = rotatedPoints[i - 1];
+
+                                // X distance = bottom left corner.X and otherpoint.X
+                                float xdistance1 = MathF.Abs(bottomleftcorner.X - toppoint.X);
+
+                                // If xDist < 1 or something THEN RIGHT TRIANGLE IS A YES!
+                                if (xdistance1 < 0.5f / Input.sizeMultiplier)
+                                {
+                                    isRightTriangle = true;
+                                    continue;
+                                }
+                                #endregion
                             }
 
                             // If we got this far we can assume this is the correct rotation and points

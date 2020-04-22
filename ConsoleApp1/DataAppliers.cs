@@ -60,10 +60,7 @@ namespace SVGToPrefab
             for (int i = 0; i < floatArray.Length; i += 2)
             {
                 xArrayList.Add(floatArray[i]);
-            }
-            for (int i = 1; i < floatArray.Length; i += 2)
-            {
-                yArrayList.Add(floatArray[i]);
+                yArrayList.Add(floatArray[i + 1]);
             }
 
             // Remove points if there is the same 2 points
@@ -122,7 +119,10 @@ namespace SVGToPrefab
             // Everything with final means its been rotated.
             Vector2[] finalPoints;
             float finalRotation;
-            CustomMath.Rotations.GetRotatedShape(1f, CustomConversions.Float2ToVect(center), points, out finalPoints, out finalRotation);
+            bool isRightTriangle;
+            CustomMath.Rotations.GetRotatedShape(1f, CustomConversions.Float2ToVect(center), points, out finalPoints, out finalRotation, out isRightTriangle);
+
+            if (isRightTriangle && points.Length == 3) obj.shapeVariant = 2;
 
             float[] finalXPoints = CustomConversions.VectIndexToFloatList(0, finalPoints);
             float[] finalYPoints = CustomConversions.VectIndexToFloatList(1, finalPoints);
@@ -212,5 +212,13 @@ namespace SVGToPrefab
                 obj.rotAngle = float.Parse(vals[1]);
             }
         }
+        struct Multi { 
+            public static void PathOutline(ref GameObjectData obj, string nextVal, out GameObjectData[] objs)
+            {
+
+            }
+        
+        }
+
     }
 }
