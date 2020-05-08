@@ -9,10 +9,13 @@ namespace SVGToPrefab
 {
     class DataAppliers
     {
-        public static void ApplyThisVal(ref GameObjectData obj, string value, string nextVal, float nextValf)
+        public static void ApplyThisVal(ref GameObjectData obj, ref PathOutline pO, string value, string nextVal, float nextValf)
         {
             Shapes? shape = null;
-            if (Program.IsItemIsInArray(value, new string[] { "@d" })) D(ref obj, nextVal, out shape);
+            if (Program.IsItemIsInArray(value, new string[] { "@d" })) {
+                D(ref obj, nextVal, out shape);
+                if (shape == null) Multi.PathOutline(ref pO, nextVal);
+            }
             if (shape != null) obj.shape = shape.Value;
 
             if (Program.IsItemIsInArray(value, new string[] { "@x", "@cx" })) X(ref obj, nextValf);
@@ -23,75 +26,23 @@ namespace SVGToPrefab
             if (Program.IsItemIsInArray(value, new string[] { "@r" })) size(ref obj, nextValf);
             if (Program.IsItemIsInArray(value, new string[] { "@fill", "@stroke" })) fill(ref obj, nextVal);
             if (Program.IsItemIsInArray(value, new string[] { "@stroke" })) stroke(ref obj);
-        }
 
+            if (value == "@x1") x1(ref pO, nextValf);
+            if (value == "@x2") x2(ref pO, nextValf);
+            if (value == "@y1") y1(ref pO, nextValf);
+            if (value == "@y2") y2(ref pO, nextValf);
+        }
         /// <summary>
-        /// Applier for custom path.
+        /// 
         /// </summary>
         public static void D(ref GameObjectData obj, string nextVal, out Shapes? shape)
         {
             shape = null;
-            // Splitting the values
-            string[] rawArray = nextVal.Split('M', 'L', 'Z', ' ', 'z', 'l', 'm');
-            ArrayList arraylist = new ArrayList();
 
-            // We dont want to add empty stuff
-            for (int i = 0; i < rawArray.Length; i++)
-                if (rawArray[i] != "") arraylist.Add(rawArray[i]);
-
-            foreach (var item in arraylist)
-            {
-                Console.WriteLine("/" + item + "/");
-            }
-
-            // We want to convert the string values to float
-            float[] floatArray = new float[arraylist.Count];
-            for (int i = 0; i < arraylist.Count; i++)
-                floatArray[i] = float.Parse((string)arraylist[i]);
-
-            Console.WriteLine(floatArray.Length);
-            // If nothing else we can assume the shape is null.
-
-            // Create float array for x and y.
-            ArrayList xArrayList = new ArrayList();
-            ArrayList yArrayList = new ArrayList();
-
-            // Length of x&y array list = floatArray.Length / 2
-            for (int i = 0; i < floatArray.Length; i += 2)
-            {
-                xArrayList.Add(floatArray[i]);
-                yArrayList.Add(floatArray[i + 1]);
-            }
-
-            // Remove points if there is the same 2 points
-            Vector2 startingPoint = new Vector2((float)xArrayList[0], (float)yArrayList[0]);
-            for (int i = 1; i < xArrayList.Count; i++)
-            {
-                if (startingPoint.X == (float)xArrayList[i] && startingPoint.Y == (float)yArrayList[i])
-                {
-                    xArrayList.RemoveAt(i);
-                    yArrayList.RemoveAt(i);
-                }
-            }
-
-            // DEBUG
-            Console.WriteLine("DEBUG LIST ///");
-            for (int i = 0; i < xArrayList.Count; i++)
-            {
-                Console.WriteLine((float)xArrayList[i] + "  ,  " + (float)yArrayList[i]);
-            }
-            Console.WriteLine("END DEBUG ///");
-            //
-
-            float[] xArray = (float[])xArrayList.ToArray(typeof(float));
-            float[] yArray = (float[])yArrayList.ToArray(typeof(float));
-
-
-            Vector2[] points = new Vector2[xArray.Length];
-            for (int i = 0; i < xArray.Length; i++)
-            {
-                points[i] = new Vector2(xArray[i], yArray[i]);
-            }
+            float[] xArray;
+            float[] yArray;
+            Vector2[] points;
+            CustomConversions.DPathToPoints(nextVal, out xArray, out yArray, out points);
 
             float SizeMultiplier = 1;
 
@@ -109,10 +60,10 @@ namespace SVGToPrefab
             float[] min = new float[] { xArray.Min(), yArray.Min() };
             float[] max = new float[] { xArray.Max(), yArray.Max() };
 
-            Console.WriteLine("minmax");
-            Console.WriteLine(min[0] + "," + min[1]);
-            Console.WriteLine(max[0] + "," + max[1]);
-            Console.WriteLine("minmax");
+            LineWriter.WriteLine("minmax");
+            LineWriter.WriteLine(min[0] + "," + min[1]);
+            LineWriter.WriteLine(max[0] + "," + max[1]);
+            LineWriter.WriteLine("minmax");
             // Get center and size
             float[] center = CustomMath.GetCenter(min, max);
 
@@ -133,10 +84,10 @@ namespace SVGToPrefab
             float[] finalSize = CustomMath.GetSize(finalMin, finalMax);
 
 
-            Console.WriteLine(center[0]);
-            Console.WriteLine(center[1]);
-            Console.WriteLine(finalSize[0]);
-            Console.WriteLine(finalSize[1]);
+            LineWriter.WriteLine(center[0]);
+            LineWriter.WriteLine(center[1]);
+            LineWriter.WriteLine(finalSize[0]);
+            LineWriter.WriteLine(finalSize[1]);
 
             // Apply center and size
             obj.positionX = center[0];
@@ -212,10 +163,31 @@ namespace SVGToPrefab
                 obj.rotAngle = float.Parse(vals[1]);
             }
         }
+        public static void x1(ref PathOutline p0, float nextValf)
+        {
+            p0.points[0].X = nextValf;
+        }
+        public static void x2(ref PathOutline p0, float nextValf)
+        {
+            p0.points[1].X = nextValf;
+        }
+        public static void y1(ref PathOutline p0, float nextValf)
+        {
+            p0.points[0].Y = nextValf;
+        }
+        public static void y2(ref PathOutline p0, float nextValf)
+        {
+            p0.points[1].Y = nextValf;
+        }
         struct Multi { 
-            public static void PathOutline(ref GameObjectData obj, string nextVal, out GameObjectData[] objs)
+            public static void PathOutline(ref PathOutline obj, string nextVal)
             {
-
+                obj = new PathOutline();
+                float[] xArray;
+                float[] yArray;
+                Vector2[] points;
+                CustomConversions.DPathToPoints(nextVal, out xArray, out yArray, out points);
+                obj.points = points;
             }
         
         }

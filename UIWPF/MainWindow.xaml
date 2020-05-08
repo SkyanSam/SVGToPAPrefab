@@ -1,0 +1,49 @@
+﻿<Window x:Class="UIWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UIWPF"
+        mc:Ignorable="d"
+        Title="SVG TO Project Arrythmia Prefab Converter, Created by SkyanSam" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="37*"/>
+            <ColumnDefinition Width="0*"/>
+            <ColumnDefinition Width="579*"/>
+            <ColumnDefinition Width="184*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Label" Grid.Column="2" HorizontalAlignment="Left" Margin="401,599,0,0" VerticalAlignment="Top"/>
+        <Button Content="Export" Grid.Column="3" HorizontalAlignment="Left" Margin="37,10,0,0" VerticalAlignment="Top" Width="137" Height="50" Click="Export_Click"/>
+        <Label Content="Open Svg Path" Grid.Column="2" HorizontalAlignment="Left" Margin="0,10,0,0" VerticalAlignment="Top" Height="25"/>
+        <TextBox Name="SVGPATHDATA" Grid.Column="2" HorizontalAlignment="Left" Margin="93,14,0,0" Text="SVGPATHDATA
+                 " TextWrapping="Wrap" VerticalAlignment="Top" Width="518" Grid.ColumnSpan="2"/>
+        <Label Content="Project Arrythmia Prefab Folder" Grid.Column="2" HorizontalAlignment="Left" Margin="0,35,0,0" VerticalAlignment="Top" Height="25"/>
+        <TextBox Name ="PAPATHDATA" Grid.Column="2" HorizontalAlignment="Left" Margin="181,39,0,0" Text="PAPATHDATA" TextWrapping="Wrap" VerticalAlignment="Top" Width="430" Grid.ColumnSpan="2"/>
+        <Rectangle Grid.Column="2" HorizontalAlignment="Left" Height="347" Margin="459,77,0,0" Stroke="Black" VerticalAlignment="Top" Width="294" Grid.ColumnSpan="2"/>
+        <Label Content="Colors" Grid.Column="2" HorizontalAlignment="Left" Height="27" Margin="459,77,0,0" VerticalAlignment="Top" Width="294" FontSize="14" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color1" Grid.Column="2" HorizontalAlignment="Left" Margin="469,109,0,0" Text="COLOR1" TextWrapping="Wrap" VerticalAlignment="Top" Width="275" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color2"  Grid.Column="2" HorizontalAlignment="Left" Margin="469,132,0,0" Text="COLOR2" TextWrapping="Wrap" VerticalAlignment="Top" Width="275" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color3" Grid.Column="2" HorizontalAlignment="Left" Margin="469,155,0,0" Text="COLOR3" TextWrapping="Wrap" VerticalAlignment="Top" Width="275" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color4" Grid.Column="2" HorizontalAlignment="Left" Margin="469,178,0,0" Text="COLOR4" TextWrapping="Wrap" VerticalAlignment="Top" Width="275" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color5" Grid.Column="2" HorizontalAlignment="Left" Margin="469,201,0,0" Text="COLOR5" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color6" Grid.Column="2" HorizontalAlignment="Left" Margin="469,224,0,0" Text="COLOR6" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color7" Grid.Column="2" HorizontalAlignment="Left" Margin="469,247,0,0" Text="COLOR7" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color8" Grid.Column="2" HorizontalAlignment="Left" Margin="469,270,0,0" Text="COLOR8" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color9" Grid.Column="2" HorizontalAlignment="Left" Margin="469,293,0,0" Text="COLOR9" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Grid.ColumnSpan="2"/>
+        <TextBox Name="Color10" Grid.Column="2" HorizontalAlignment="Left" Margin="469,316,0,0" Text="COLOR10" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Grid.ColumnSpan="2"/>
+        <Label Content="Prefab Name" Grid.Column="2" HorizontalAlignment="Left" Margin="0,60,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.611,-0.237" Width="88" Height="30"/>
+        <Label Content="Prefab Type" Grid.Column="2" HorizontalAlignment="Left" Margin="264,62,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.611,-0.237" Width="88" Height="28"/>
+        <TextBox Name="PrefabTypeDATA" Grid.Column="2" HorizontalAlignment="Left" Margin="346,67,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="100"/>
+        <TextBox Name="PrefabNameDATA" Grid.Column="2" HorizontalAlignment="Left" Margin="88,66,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="171"/>
+        <Label Content="Size Multiplier" Grid.Column="2" HorizontalAlignment="Left" Margin="0,89,0,0" VerticalAlignment="Top" Width="88"/>
+        <Label Content="Starting Lifespan in Seconds" Grid.Column="2" HorizontalAlignment="Left" Margin="0,112,0,0" VerticalAlignment="Top" Width="159"/>
+        <TextBox Name="SizeMultiplierDATA" Grid.Column="2" HorizontalAlignment="Left" Margin="93,94,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="353"/>
+        <TextBox Name="SecondsToLastDATA" Grid.Column="2" HorizontalAlignment="Left" Margin="159,118,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="287"/>
+        <TextBox Name="CONSOLE" IsReadOnly ="True"  HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" Grid.Column="2" HorizontalAlignment="Left" Margin="0,155,0,0" Text="TextBoxhi" TextWrapping="Wrap" VerticalAlignment="Top" Width="446" Height="269"/>
+        <TextBlock Name="Testblock">
+            
+        </TextBlock>
+
+    </Grid>
+</Window> 

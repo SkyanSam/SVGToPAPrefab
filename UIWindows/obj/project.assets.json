@@ -10,6 +10,19 @@
         "runtime": {
           "lib/netstandard2.0/Newtonsoft.Json.dll": {}
         }
+      },
+      "SVGToPrefab/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v3.1",
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3"
+        },
+        "compile": {
+          "bin/placeholder/SVGToPrefab.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SVGToPrefab.dll": {}
+        }
       }
     }
   },
@@ -44,11 +57,16 @@
         "newtonsoft.json.nuspec",
         "packageIcon.png"
       ]
+    },
+    "SVGToPrefab/1.0.0": {
+      "type": "project",
+      "path": "../ConsoleApp1/SVGToPrefab.csproj",
+      "msbuildProject": "../ConsoleApp1/SVGToPrefab.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v3.1": [
-      "Newtonsoft.Json >= 12.0.3"
+      "SVGToPrefab >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -57,11 +75,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Documents\\CSharpProjects\\SVGToPAPrefab\\ConsoleApp1\\SVGToPrefab.csproj",
-      "projectName": "SVGToPrefab",
-      "projectPath": "D:\\Documents\\CSharpProjects\\SVGToPAPrefab\\ConsoleApp1\\SVGToPrefab.csproj",
+      "projectUniqueName": "D:\\Documents\\CSharpProjects\\SVGToPAPrefab\\UIWindows\\UIWindows.csproj",
+      "projectName": "UIWindows",
+      "projectPath": "D:\\Documents\\CSharpProjects\\SVGToPAPrefab\\UIWindows\\UIWindows.csproj",
       "packagesPath": "C:\\Users\\samue\\.nuget\\packages\\",
-      "outputPath": "D:\\Documents\\CSharpProjects\\SVGToPAPrefab\\ConsoleApp1\\obj\\",
+      "outputPath": "D:\\Documents\\CSharpProjects\\SVGToPAPrefab\\UIWindows\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\samue\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -76,7 +94,11 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Documents\\CSharpProjects\\SVGToPAPrefab\\ConsoleApp1\\SVGToPrefab.csproj": {
+              "projectPath": "D:\\Documents\\CSharpProjects\\SVGToPAPrefab\\ConsoleApp1\\SVGToPrefab.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
@@ -87,12 +109,6 @@
     },
     "frameworks": {
       "netcoreapp3.1": {
-        "dependencies": {
-          "Newtonsoft.Json": {
-            "target": "Package",
-            "version": "[12.0.3, )"
-          }
-        },
         "imports": [
           "net461",
           "net462",
@@ -106,6 +122,9 @@
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
+          },
+          "Microsoft.WindowsDesktop.App.WindowsForms": {
+            "privateAssets": "none"
           }
         },
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"

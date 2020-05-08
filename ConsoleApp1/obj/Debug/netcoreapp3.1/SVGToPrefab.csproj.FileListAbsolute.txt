@@ -1,0 +1,15 @@
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\SVGToPrefab.exe
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\SVGToPrefab.deps.json
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\SVGToPrefab.runtimeconfig.json
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\SVGToPrefab.runtimeconfig.dev.json
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\SVGToPrefab.dll
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\SVGToPrefab.pdb
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\bin\Debug\netcoreapp3.1\PrefabBuilder.dll
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\SVGToPrefab.csprojAssemblyReference.cache
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\SVGToPrefab.AssemblyInfoInputs.cache
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\SVGToPrefab.AssemblyInfo.cs
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\SVGToPrefab.csproj.CopyComplete
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\SVGToPrefab.dll
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\SVGToPrefab.pdb
+D:\Documents\CSharpProjects\SVGToPAPrefab\ConsoleApp1\obj\Debug\netcoreapp3.1\SVGToPrefab.genruntimeconfig.cache

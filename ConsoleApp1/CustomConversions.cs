@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Numerics;
+using System.Collections;
 
 namespace SVGToPrefab.Custom
 {
@@ -34,6 +34,70 @@ namespace SVGToPrefab.Custom
             //var skewX = matrix[1];
             var skewY = matrix[2];
             rot = MathF.Asin(skewY) * 180 / MathF.PI;
+        }
+        public static void DPathToPoints(string nextVal, out float[] xArray, out float[] yArray, out Vector2[] points)
+        {
+            // Splitting the values
+            string[] rawArray = nextVal.Split('M', 'L', 'Z', ' ', 'z', 'l', 'm');
+            ArrayList arraylist = new ArrayList();
+
+            // We dont want to add empty stuff
+            for (int i = 0; i < rawArray.Length; i++)
+                if (rawArray[i] != "") arraylist.Add(rawArray[i]);
+
+            foreach (var item in arraylist)
+            {
+                Console.WriteLine("/" + item + "/");
+            }
+
+            // We want to convert the string values to float
+            float[] floatArray = new float[arraylist.Count];
+            for (int i = 0; i < arraylist.Count; i++)
+                floatArray[i] = float.Parse((string)arraylist[i]);
+
+            Console.WriteLine(floatArray.Length);
+            // If nothing else we can assume the shape is null.
+
+            // Create float array for x and y.
+            ArrayList xArrayList = new ArrayList();
+            ArrayList yArrayList = new ArrayList();
+
+            // Length of x&y array list = floatArray.Length / 2
+            for (int i = 0; i < floatArray.Length; i += 2)
+            {
+                xArrayList.Add(floatArray[i]);
+                yArrayList.Add(floatArray[i + 1]);
+            }
+
+            // Remove points if there is the same 2 points
+            Vector2 startingPoint = new Vector2((float)xArrayList[0], (float)yArrayList[0]);
+            for (int i = 1; i < xArrayList.Count; i++)
+            {
+                if (startingPoint.X == (float)xArrayList[i] && startingPoint.Y == (float)yArrayList[i])
+                {
+                    xArrayList.RemoveAt(i);
+                    yArrayList.RemoveAt(i);
+                }
+            }
+
+            // DEBUG
+            Console.WriteLine("DEBUG LIST ///");
+            for (int i = 0; i < xArrayList.Count; i++)
+            {
+                Console.WriteLine((float)xArrayList[i] + "  ,  " + (float)yArrayList[i]);
+            }
+            Console.WriteLine("END DEBUG ///");
+            //
+
+            xArray = (float[])xArrayList.ToArray(typeof(float));
+            yArray = (float[])yArrayList.ToArray(typeof(float));
+
+
+            points = new Vector2[xArray.Length];
+            for (int i = 0; i < xArray.Length; i++)
+            {
+                points[i] = new Vector2(xArray[i], yArray[i]);
+            }
         }
         
     }

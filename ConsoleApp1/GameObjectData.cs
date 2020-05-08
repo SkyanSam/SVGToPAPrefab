@@ -75,11 +75,11 @@ namespace SVGToPrefab
 
             ;
         }
-        public static string[] varLabels = new string[] { "@x", "@y", "@width", "@height", "@cx", "@cy", "@r", "@rx", "@ry" };
+        public static string[] varLabels = new string[] { "@x", "@y", "@width", "@height", "@cx", "@cy", "@r", "@rx", "@ry", "@x1", "@x2", "@y1", "@y2" };
     }
     class PathOutline
     {
-        public Vector2[] points;
+        public Vector2[] points = new Vector2[2] { new Vector2(), new Vector2() };
         public int colorNum = 0;
         public float outlineSize = 1;
         public GameObjectData[] ToObjs()
@@ -99,8 +99,8 @@ namespace SVGToPrefab
                     shape = Shapes.Square,
                     sizeY = outlineSize * Input.sizeMultiplier, // Size of outline
                     sizeX = (nextpoint - points[i]).Magnitude(), // Length of this part of the path
-                    rotAngle = Custom.CustomMath.Rotations.GetRotationFromVector(points[i], nextpoint), // Rotation.
-                    offsetX = -0.5f,
+                    rotAngle = -Custom.CustomMath.Rotations.GetRotationFromVector(points[i] / 2, nextpoint / 2), // Rotation.
+                    offsetX = 0.5f,
                     offsetY = 0,
                 };
             }
