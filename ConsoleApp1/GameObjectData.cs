@@ -40,8 +40,8 @@ namespace SVGToPrefab
             obj.OffsetX = offsetX;
             obj.OffsetY = offsetY;
             //
-            obj.SetPosition(Input.sizeMultiplier * positionX, Input.sizeMultiplier * -positionY);
-            obj.SetScale(Input.sizeMultiplier * sizeX, Input.sizeMultiplier * sizeY);
+            obj.SetPosition(positionX, -positionY);
+            obj.SetScale(sizeX, sizeY);
             obj.SetRotation(rotAngle);
             obj.SetColor(colorNum);
 
@@ -90,6 +90,8 @@ namespace SVGToPrefab
                 Vector2 nextpoint;
                 if (i + 1 >= points.Length) nextpoint = points[0];
                 else nextpoint = points[i + 1];
+                Vector2 target = nextpoint - points[i];
+                target.Y *= -1;
 
                 objs[i] = new GameObjectData() {
                     ID = Program.GenerateID(1000),
@@ -98,14 +100,27 @@ namespace SVGToPrefab
                     positionY = points[i].Y,
                     shape = Shapes.Square,
                     sizeY = outlineSize * Input.sizeMultiplier, // Size of outline
-                    sizeX = (nextpoint - points[i]).Magnitude(), // Length of this part of the path
-                    rotAngle = -Custom.CustomMath.Rotations.GetRotationFromVector(points[i] / 2, nextpoint / 2), // Rotation.
+                    sizeX = target.Magnitude(), // Length of this part of the path
+
+                    rotAngle = Custom.CustomMath.Rotations.GetRotationFromVector(
+                        new Vector2(points[i].X, -points[i].Y),
+                        new Vector2(nextpoint.X, -nextpoint.Y)
+                    ),
                     offsetX = 0.5f,
                     offsetY = 0,
                 };
             }
             return objs;
         }
-        
+        public override string ToString()
+        {
+            string returnTxt = base.ToString() + " { \n";
+            GameObjectData[] objs = ToObjs();
+            foreach (GameObjectData data in objs)
+                returnTxt += data.ToString() + "\n";
+            returnTxt += "\n } ";
+            System.Diagnostics.Debug.WriteLine(returnTxt);
+            return returnTxt;
+        }
     }
 }

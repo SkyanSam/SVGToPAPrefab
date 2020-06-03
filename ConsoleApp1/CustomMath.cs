@@ -24,16 +24,44 @@ namespace SVGToPrefab.Custom
         }
         public static float Magnitude(this Vector2 vect)
         {
-            return (vect.X*vect.X) + (vect.Y*vect.Y);
+            return MathF.Sqrt((vect.X*vect.X) + (vect.Y*vect.Y));
         }
         public struct Rotations
         {
             // https://stackoverflow.com/questions/17530169/get-angle-between-point-and-origin [Too lazy to figure out on my own]
+            // https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
             public static float GetRotationFromVector(Vector2 center, Vector2 target)
             {
-                Vector2 vector2 = target - center;
-                double n = 360f - (Math.Atan2(center.Y - target.Y, center.X - target.X) * 180 / Math.PI);
-                return (float)n % 360f;
+                return (float)calculateAngle (
+                    center.X, center.Y, 
+                    target.X, target.Y, 
+                    center.X + (target - center).Magnitude(), center.Y + 0
+                );
+            }
+            /// <summary>
+            /// Returns in radians.
+            /// </summary>
+            public static float GetRotationFromThreePts(Vector2 P1, Vector2 P2, Vector2 P3)
+            {
+                return MathF.Atan2(P3.Y - P1.Y, P3.X - P1.X) -
+                MathF.Atan2(P2.Y - P1.Y, P2.X - P1.X);
+            }
+            public static double calculateAngle(double P1X, double P1Y, double P2X, double P2Y, double P3X, double P3Y)
+            {
+
+                double numerator = P2Y * (P1X - P3X) + P1Y * (P3X - P2X) + P3Y * (P2X - P1X);
+                double denominator = (P2X - P1X) * (P1X - P3X) + (P2Y - P1Y) * (P1Y - P3Y);
+                double ratio = numerator / denominator;
+
+                double angleRad = Math.Atan(ratio);
+                double angleDeg = (angleRad * 180) / Math.PI;
+
+                if (angleDeg < 0)
+                {
+                    angleDeg = 180 + angleDeg;
+                }
+
+                return angleDeg;
             }
             ///<summary>
             ///Rotates points anti clockwise around the origin.

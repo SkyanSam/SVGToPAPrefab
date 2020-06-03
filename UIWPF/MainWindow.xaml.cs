@@ -21,21 +21,13 @@ namespace UIWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        string[] colors;
         Thread console;
         public MainWindow()
         {
             InitializeComponent();
 
-            colors = new string[]
-            {
-                Color1.Text, Color2.Text, Color3.Text,
-                Color4.Text, Color5.Text, Color6.Text,
-                Color7.Text, Color8.Text, Color9.Text,
-                Color10.Text
-            };
-            for (int i = 0; i < colors.Length; i++)
-                colors[i] = Input.Colors.ids[i];
+            for (int i = 0; i < 10; i++)
+                SetColor(i, Input.Colors.ids[i]);
 
             PAPATHDATA.Text = Input.prefabPath.ToString();
             SVGPATHDATA.Text = Input.svgPath.ToString();
@@ -45,6 +37,41 @@ namespace UIWPF
             PrefabTypeDATA.Text = "Misc1";
 
             
+
+            
+        }
+        void SetColor(int i, string v)
+        {
+            switch (i)
+            {
+                case 0: Color1.Text = v; break;
+                case 1: Color2.Text = v; break;
+                case 2: Color3.Text = v; break;
+                case 3: Color4.Text = v; break;
+                case 4: Color5.Text = v; break;
+                case 5: Color6.Text = v; break;
+                case 6: Color7.Text = v; break;
+                case 7: Color8.Text = v; break;
+                case 8: Color9.Text = v; break;
+                case 9: Color10.Text = v; break;
+            }
+        }
+        string GetColor(int i)
+        {
+            switch (i)
+            {
+                case 0: return Color1.Text;
+                case 1: return Color2.Text;
+                case 2: return Color3.Text;
+                case 3: return Color4.Text;
+                case 4: return Color5.Text;
+                case 5: return Color6.Text;
+                case 6: return Color7.Text;
+                case 7: return Color8.Text;
+                case 8: return Color9.Text;
+                case 9: return Color10.Text;
+                default: return "";
+            }
         }
         public void ConsoleLog()
         {
@@ -61,7 +88,6 @@ namespace UIWPF
                         LineBreak linebreak = new LineBreak();
                         CONSOLE.Text += "\n" + line; // Linebreak
 
-                        
                         LineWriter.console.Remove(line); // Remove stuff
                     }
                 }
@@ -70,8 +96,8 @@ namespace UIWPF
         private void Export_Click(object sender, RoutedEventArgs e)
         {
             
-            for (int i = 0; i < colors.Length; i++)
-                Input.Colors.ids[i] = colors[i];
+            for (int i = 0; i < 10; i++)
+                Input.Colors.ids[i] = GetColor(i);
 
             Input.prefabPath = PAPATHDATA.Text;
             Input.svgPath = SVGPATHDATA.Text;

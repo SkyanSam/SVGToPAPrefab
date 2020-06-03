@@ -8,6 +8,8 @@ using System.Xml;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+
 [assembly: InternalsVisibleTo("UIWindows")]
 [assembly: InternalsVisibleTo("UIWPF")]
 
@@ -38,18 +40,19 @@ namespace SVGToPrefab
             string jStr = XMLToJSON(Input.svgPath);
 
             // JSON -> GameObjectData[] {Custom Class}
-            ArrayList gameObjectDataList, pathOutlineList;
+            List<GameObjectData> gameObjectDataList;
+            List<PathOutline> pathOutlineList;
             JSONToGameObjectData(jStr, out gameObjectDataList, out pathOutlineList);
             foreach (var data in gameObjectDataList) LineWriter.WriteLine(((GameObjectData)data).ToString());
-
+            foreach (var outline in pathOutlineList) if (((PathOutline)outline) != null) LineWriter.WriteLine(((PathOutline)outline).ToString());
             // GameObjectData[] -> GameObject[]
-            ArrayList gameObjectsList = new ArrayList();
+            List<GameObject> gameObjectsList = new List<GameObject>();
 
             ApplyGameObjectDatasToGameObjectList(gameObjectDataList, ref gameObjectsList);
             ApplyGameObjectDatasToGameObjectList (
                 ConvertPathOutlinesToGameObjectDatas(pathOutlineList), ref gameObjectsList );
 
-            GameObject[] objects = Ext.GetArrayType<GameObject>(gameObjectsList);
+            GameObject[] objects = gameObjectsList.ToArray();
 
             // GameObject[] -> Prefab!
             PrefabBuilder pb = new PrefabBuilder(Input.prefabName, Input.prefabType, 0);
@@ -76,10 +79,10 @@ namespace SVGToPrefab
             return jsonTxt;
             
         }
-        static void JSONToGameObjectData(string json, out ArrayList gameObjectsData, out ArrayList pathOutlinesData)
+        static void JSONToGameObjectData(string json, out List<GameObjectData> gameObjectsData, out List<PathOutline> pathOutlinesData)
         {
-            gameObjectsData = new ArrayList();
-            pathOutlinesData = new ArrayList();
+            gameObjectsData = new List<GameObjectData>();
+            pathOutlinesData = new List<PathOutline>();
             int cItem = -1; // current Item
             string currentType = "";
             bool objectStarted = false;
@@ -136,17 +139,18 @@ namespace SVGToPrefab
                     string nextVal = (string)values[i + 1];
                     if (nextVal != null)
                     {
-                        GameObjectData obj = (GameObjectData)gameObjectsData[cItem];
-                        PathOutline pO = (PathOutline)pathOutlinesData[cItem];
+                        GameObjectData obj = gameObjectsData[cItem];
+                        PathOutline pO = pathOutlinesData[cItem];
                         float nextValf = 0.0f;
                         int j;
 
                         // This is to see if the item is any of the following cases to see if the nextVal is a float or not.
-                        if (IsItemIsInArray(value, GameObjectData.varLabels, out j)) nextValf = float.Parse(nextVal);
+                        if (IsItemIsInArray(value, GameObjectData.varLabels, out j)) nextValf = float.Parse(nextVal) * Input.sizeMultiplier;
 
                         // Different Objects
                         DataAppliers.ApplyThisVal(ref obj, ref pO, value, nextVal, nextValf);
                         gameObjectsData[cItem] = obj;
+                        pathOutlinesData[cItem] = pO;
                     }
                 }
 
@@ -183,26 +187,25 @@ namespace SVGToPrefab
             }
             */
         }
-        public static void ApplyGameObjectDatasToGameObjectList(ArrayList GameObjectDataList, ref ArrayList GameObjectList)
+        public static void ApplyGameObjectDatasToGameObjectList(List<GameObjectData> GameObjectDataList, ref List<GameObject> GameObjectList)
         {
             for (int i = 0; i < GameObjectDataList.Count; i++)
-                if (((GameObjectData)GameObjectDataList[i]).shape != null) // We don't want to add a shape we can't even determine!
-                    GameObjectList.Add(((GameObjectData)GameObjectDataList[i]).ToObj());
+                if (GameObjectDataList[i].shape != null) // We don't want to add a shape we can't even determine!
+                    GameObjectList.Add(GameObjectDataList[i].ToObj());
         }
-        public static ArrayList ConvertPathOutlinesToGameObjectDatas(ArrayList dataList)
+        public static List<GameObjectData> ConvertPathOutlinesToGameObjectDatas(List<PathOutline> pathOutlines)
         {
             // Clears any null objects
-            for (int i = 0; i < dataList.Count; i++)
-                if ((PathOutline)dataList[i] == null)
-                    dataList.RemoveAt(i);
+            for (int i = 0; i < pathOutlines.Count; i++)
+                if (pathOutlines[i] == null)
+                    pathOutlines.RemoveAt(i);
 
-            PathOutline[] pathOutline = Ext.GetArrayType<PathOutline>(dataList);
-            ArrayList gameObjectDatas = new ArrayList();
-            for (int i = 0; i < pathOutline.Length; i++)
+            List<GameObjectData> gameObjectDatas = new List<GameObjectData>();
+            for (int i = 0; i < pathOutlines.Count; i++)
             {
-                if (pathOutline[i] != null)
+                if (pathOutlines[i] != null)
                 {
-                    GameObjectData[] tempPathOutlineObjs = pathOutline[i].ToObjs();
+                    GameObjectData[] tempPathOutlineObjs = pathOutlines[i].ToObjs();
                     foreach (GameObjectData data in tempPathOutlineObjs)
                         gameObjectDatas.Add(data);
                 }

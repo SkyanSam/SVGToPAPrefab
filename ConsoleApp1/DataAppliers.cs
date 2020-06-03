@@ -165,18 +165,22 @@ namespace SVGToPrefab
         }
         public static void x1(ref PathOutline p0, float nextValf)
         {
+            if (p0 == null) p0 = new PathOutline();
             p0.points[0].X = nextValf;
         }
         public static void x2(ref PathOutline p0, float nextValf)
         {
+            if (p0 == null) p0 = new PathOutline();
             p0.points[1].X = nextValf;
         }
         public static void y1(ref PathOutline p0, float nextValf)
         {
+            if (p0 == null) p0 = new PathOutline();
             p0.points[0].Y = nextValf;
         }
         public static void y2(ref PathOutline p0, float nextValf)
         {
+            if (p0 == null) p0 = new PathOutline();
             p0.points[1].Y = nextValf;
         }
         struct Multi { 
