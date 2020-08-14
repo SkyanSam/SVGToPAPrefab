@@ -14,7 +14,7 @@ Lily for the base game
 
 # Documentation
 
-A lot of the documentation is in <summary></summary> above the various classes/functions  
+A lot of the documentation is in ``<summary></summary>`` above the various classes/functions  
 ConsoleApp1.proj contains the actual converter  
 UIWPF.proj is just an addon to ConsoleApp1 as the user interface.  
 Input.cs contains all the input variables  
