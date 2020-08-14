@@ -2,7 +2,7 @@
  Convert SVG files to Project Arrythmia prefabs that you can use in levels!
 This is in alpha stage, therefore a lot of things aren't implemented so expect errors if you are trying to convert complex stuff (such as paths)  
 I made a video talking about this project here:  
-If you would like to contribute (submit bug / pull request) check out the CONTRIBUTING.md file. https://github.com/SkyanSam/SVGToPAPrefab/blob/master/CONTRIBUTING.md  
+##### If you would like to contribute (submit bug / pull request) check out the CONTRIBUTING.md file. https://github.com/SkyanSam/SVGToPAPrefab/blob/master/CONTRIBUTING.md  
 
 ## Thanks to
 Terranbyte for the PAPrefabBuilder https://github.com/Terranbyte/PA-Prefab-Builder  
