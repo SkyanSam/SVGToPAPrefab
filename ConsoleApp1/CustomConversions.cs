@@ -35,6 +35,13 @@ namespace SVGToPrefab.Custom
             var skewY = matrix[2];
             rot = MathF.Asin(skewY) * 180 / MathF.PI;
         }
+        /// <summary>
+        /// Specifically for converting the @D attribute to points on the path
+        /// </summary>
+        /// <param name="nextVal"></param>
+        /// <param name="xArray"></param>
+        /// <param name="yArray"></param>
+        /// <param name="points"></param>
         public static void DPathToPoints(string nextVal, out float[] xArray, out float[] yArray, out Vector2[] points)
         {
             // Splitting the values

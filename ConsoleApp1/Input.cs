@@ -16,7 +16,7 @@ namespace SVGToPrefab
             {"Misc1", PrefabType.Misc1 }
         };
         public static float secondsToLast = 15f;
-        public static string svgPath = @"D:/Documents/CSharpProjects/SmileyFace.svg";
+        public static string svgPath = @"";
         public static string prefabPath = @"C:\Program Files (x86)\Steam\steamapps\common\Project Arrhythmia\beatmaps\prefabs";
 
         public static float sizeMultiplier = 1;

@@ -7,63 +7,61 @@ using SVGToPrefab.Custom;
 
 namespace SVGToPrefab
 {
+    /// <summary>
+    /// This class is for applying data from our attributes and values to the GameObjectData class.
+    /// Each function corresponds with the actual SVG attribute.
+    /// </summary>
     class DataAppliers
     {
-        public static void ApplyThisVal(ref GameObjectData obj, ref PathOutline pO, string value, string nextVal, float nextValf)
+        public static void ApplyThisAttributeValue(ref GameObjectData obj, ref PathOutline pO, string value, string nextVal, float nextValf)
         {
             Shapes? shape = null;
-            if (Program.IsItemIsInArray(value, new string[] { "@d" })) {
+            if (value == "d") {
                 D(ref obj, nextVal, out shape);
                 if (shape == null) Multi.PathOutline(ref pO, nextVal);
             }
             if (shape != null) obj.shape = shape.Value;
-
-            if (Program.IsItemIsInArray(value, new string[] { "@x", "@cx" })) X(ref obj, nextValf);
-            if (Program.IsItemIsInArray(value, new string[] { "@y", "@cy" })) Y(ref obj, nextValf);
-            if (Program.IsItemIsInArray(value, new string[] { "@width", "@rx" })) sizeX(ref obj, nextValf, value);
-            if (Program.IsItemIsInArray(value, new string[] { "@height", "@ry" })) sizeY(ref obj, nextValf, value);
-            if (Program.IsItemIsInArray(value, new string[] { "@transform" })) translate(ref obj, nextVal);
-            if (Program.IsItemIsInArray(value, new string[] { "@r" })) size(ref obj, nextValf);
-            if (Program.IsItemIsInArray(value, new string[] { "@fill", "@stroke" })) fill(ref obj, nextVal);
-            if (Program.IsItemIsInArray(value, new string[] { "@stroke" })) stroke(ref obj);
-
-            if (value == "@x1") x1(ref pO, nextValf);
-            if (value == "@x2") x2(ref pO, nextValf);
-            if (value == "@y1") y1(ref pO, nextValf);
-            if (value == "@y2") y2(ref pO, nextValf);
+            switch (value) {
+                case "x": case "cx": X(ref obj, nextValf); break;
+                case "y": case "cy": Y(ref obj, nextValf); break;
+                case "width": case "rx": sizeX(ref obj, nextValf, value); break;
+                case "height": case "ry": sizeY(ref obj, nextValf, value); break;
+                case "transform": translate(ref obj, nextVal); break;
+                case "r": size(ref obj, nextValf); break;
+                case "stroke": fill(ref obj, nextVal); stroke(ref obj); break;
+                case "stroke-width": strokeWidth(ref pO, nextValf); break;
+                case "fill": fill(ref obj, nextVal); break;
+                case "x1": x1(ref pO, nextValf); break;
+                case "x2": x2(ref pO, nextValf); break;
+                case "y1": y1(ref pO, nextValf); break;
+                case "y2": y2(ref pO, nextValf); break;
+            }
         }
-        /// <summary>
-        /// 
-        /// </summary>
         public static void D(ref GameObjectData obj, string nextVal, out Shapes? shape)
         {
             shape = null;
 
-            float[] xArray;
-            float[] yArray;
-            Vector2[] points;
+            float[] xArray; // Array of X values 
+            float[] yArray; // Array of Y values
+            Vector2[] points; // Array of points
             CustomConversions.DPathToPoints(nextVal, out xArray, out yArray, out points);
 
             float SizeMultiplier = 1;
 
             // Analyze the number of points. We multiply by two because its split up by float, not by vector / float[2] then add two because of [M x y]
-            if (points.Length == 3)
-            {
-                shape = Shapes.Triangle;
-                SizeMultiplier = 2;
+            switch (points.Length) {
+                case 3:
+                    shape = Shapes.Triangle;
+                    SizeMultiplier = 2;
+                break;
+                case 4: shape = Shapes.Square; break;
+                case 6: shape = Shapes.Hexagon; break;
             }
-
-            else if (points.Length == 4) shape = Shapes.Square;
-            else if (points.Length == 6) shape = Shapes.Hexagon;
-
+    
             // Get min and max
-            float[] min = new float[] { xArray.Min(), yArray.Min() };
-            float[] max = new float[] { xArray.Max(), yArray.Max() };
+            float[] min = new float[] { xArray.Min(), yArray.Min() }; // float[2]
+            float[] max = new float[] { xArray.Max(), yArray.Max() }; // float[2]
 
-            LineWriter.WriteLine("minmax");
-            LineWriter.WriteLine(min[0] + "," + min[1]);
-            LineWriter.WriteLine(max[0] + "," + max[1]);
-            LineWriter.WriteLine("minmax");
             // Get center and size
             float[] center = CustomMath.GetCenter(min, max);
 
@@ -75,14 +73,14 @@ namespace SVGToPrefab
 
             if (isRightTriangle && points.Length == 3) obj.shapeVariant = 2;
 
-            float[] finalXPoints = CustomConversions.VectIndexToFloatList(0, finalPoints);
+            float[] finalXPoints = CustomConversions.VectIndexToFloatList(0, finalPoints); 
             float[] finalYPoints = CustomConversions.VectIndexToFloatList(1, finalPoints);
 
-            float[] finalMin = new float[] { finalXPoints.Min(), finalYPoints.Min() };
-            float[] finalMax = new float[] { finalXPoints.Max(), finalYPoints.Max() };
+            float[] finalMin = new float[] { finalXPoints.Min(), finalYPoints.Min() }; // float[2]
+            float[] finalMax = new float[] { finalXPoints.Max(), finalYPoints.Max() }; // float[2]
 
-            float[] finalSize = CustomMath.GetSize(finalMin, finalMax);
-
+            float[] finalSize = CustomMath.GetSize(finalMin, finalMax); // float[2]
+            // Questioning if I should use Vector or Point instead of float[2]
 
             LineWriter.WriteLine(center[0]);
             LineWriter.WriteLine(center[1]);
@@ -107,13 +105,13 @@ namespace SVGToPrefab
         public static void sizeX(ref GameObjectData obj, float nextValf, string value)
         {
             int multiplier = 1;
-            if (value == "@rx") multiplier = 2; // If this is an ellipse we want twice as much
+            if (value == "rx") multiplier = 2; // If this is an ellipse we want twice as much
             obj.sizeX = nextValf * multiplier;
         }
         public static void sizeY(ref GameObjectData obj, float nextValf, string value)
         {
             int multiplier = 1;
-            if (value == "@ry") multiplier = 2; // If this is an ellipse we want twice as much
+            if (value == "ry") multiplier = 2; // If this is an ellipse we want twice as much
             obj.sizeY = nextValf * multiplier;
         }
         public static void size(ref GameObjectData obj, float nextValf)
@@ -131,6 +129,10 @@ namespace SVGToPrefab
         public static void stroke(ref GameObjectData obj)
         {
             obj.shapeVariant = 1;
+        }
+        public static void strokeWidth(ref PathOutline pO, float nextValf)
+        {
+            if (pO != null) pO.outlineSize = nextValf;
         }
         public static void rotation(ref GameObjectData obj, float nextValf)
         {
@@ -153,11 +155,14 @@ namespace SVGToPrefab
                 float sizeY; // Not valid at this point I think
                 float rotation;
                 CustomConversions.GetVarsFromMatrix(matrix, out posXdelta, out posYdelta, out sizeX, out sizeY, out rotation);
-                obj.offsetX = 0;
+
+                // Consider making the offset center and push everything by 0.5?
+                obj.offsetX = 0; 
                 obj.offsetY = 0;
+                //
                 obj.positionX += 0.5f;
                 obj.rotAngle = rotation;
-                // I NEED TO MAKE THE OFFSET CENTER AND THEN PUSH EVERYTHING BY 0.5
+                
             } else if (vals[0] == "rotate")
             {
                 obj.rotAngle = float.Parse(vals[1]);

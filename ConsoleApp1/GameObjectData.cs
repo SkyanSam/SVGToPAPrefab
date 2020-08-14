@@ -7,6 +7,9 @@ using SVGToPrefab.Custom;
 
 namespace SVGToPrefab
 {
+    /// <summary>
+    /// This isn't a GameObject class but it can be compiled to one.
+    /// </summary>
     class GameObjectData
     {
         public int ID;
@@ -45,9 +48,6 @@ namespace SVGToPrefab
             obj.SetRotation(rotAngle);
             obj.SetColor(colorNum);
 
-            // Animation / Making sure the object lasts
-            // 
-            //Event e = new Event(EventType.col, UserOptions.secondsToLast);
             GameObject deepObj = obj.Clone();
             deepObj.AddEvent(EventType.col, Input.secondsToLast, colorNum, null, Easing.Linear);
             return deepObj;
@@ -75,13 +75,16 @@ namespace SVGToPrefab
 
             ;
         }
-        public static string[] varLabels = new string[] { "@x", "@y", "@width", "@height", "@cx", "@cy", "@r", "@rx", "@ry", "@x1", "@x2", "@y1", "@y2" };
+        public static string[] varLabels = new string[] { "x", "y", "width", "height", "cx", "cy", "r", "rx", "ry", "x1", "x2", "y1", "y2" };
     }
+    /// <summary>
+    /// This is used to represent the perimeters of multishapes/polygons, such as the <path></path> name.
+    /// </summary>
     class PathOutline
     {
         public Vector2[] points = new Vector2[2] { new Vector2(), new Vector2() };
         public int colorNum = 0;
-        public float outlineSize = 1;
+        public float outlineSize { get; set; } = 1;
         public GameObjectData[] ToObjs()
         {
             GameObjectData[] objs = new GameObjectData[points.Length];
@@ -92,12 +95,11 @@ namespace SVGToPrefab
                 else nextpoint = points[i + 1];
                 Vector2 target = nextpoint - points[i];
                 target.Y *= -1;
-
                 objs[i] = new GameObjectData() {
                     ID = Program.GenerateID(1000),
                     colorNum = this.colorNum,
-                    positionX = points[i].X,
-                    positionY = points[i].Y,
+                    positionX = points[i].X + (target.Normalize().X * outlineSize * Input.sizeMultiplier),
+                    positionY = points[i].Y + (target.Normalize().Y * outlineSize * Input.sizeMultiplier),
                     shape = Shapes.Square,
                     sizeY = outlineSize * Input.sizeMultiplier, // Size of outline
                     sizeX = target.Magnitude(), // Length of this part of the path
@@ -122,5 +124,10 @@ namespace SVGToPrefab
             System.Diagnostics.Debug.WriteLine(returnTxt);
             return returnTxt;
         }
+    }
+    /// <summary>
+    /// This is used to represent the areas of multishapes/polygons, such as the <path></path> name.
+    /// </summary>
+    class PathArea {
     }
 }

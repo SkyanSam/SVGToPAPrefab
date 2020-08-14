@@ -9,6 +9,10 @@ namespace SVGToPrefab.Custom
 {
     static class CustomMath
     {
+        /* Note: Min is the point with the lowest x and y values out of all points
+         * Max is the point with the highest x and y values.
+         * Min and Max are really just Vector2/Point not float[] with large array.
+         */
         public static float[] GetCenter(float[] min, float[] max)
         {
             return new float[] { (max[0] + min[0]) / 2f, (max[1] + min[1]) / 2f };
@@ -28,8 +32,15 @@ namespace SVGToPrefab.Custom
         }
         public struct Rotations
         {
-            // https://stackoverflow.com/questions/17530169/get-angle-between-point-and-origin [Too lazy to figure out on my own]
+            // https://stackoverflow.com/questions/17530169/get-angle-between-point-and-origin 
             // https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
+
+            /// <summary>
+            /// Gets the rotation from a center point and a vector representing direction
+            /// </summary>
+            /// <param name="center">Center Point</param>
+            /// <param name="target">Vector Representing Direction</param>
+            /// <returns></returns>
             public static float GetRotationFromVector(Vector2 center, Vector2 target)
             {
                 return (float)calculateAngle (
@@ -48,7 +59,6 @@ namespace SVGToPrefab.Custom
             }
             public static double calculateAngle(double P1X, double P1Y, double P2X, double P2Y, double P3X, double P3Y)
             {
-
                 double numerator = P2Y * (P1X - P3X) + P1Y * (P3X - P2X) + P3Y * (P2X - P1X);
                 double denominator = (P2X - P1X) * (P1X - P3X) + (P2Y - P1Y) * (P1Y - P3Y);
                 double ratio = numerator / denominator;

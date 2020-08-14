@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using SVGToPrefab;
 using System.Threading;
+using System.IO;
 namespace UIWPF
 {
     /// <summary>
@@ -75,11 +76,8 @@ namespace UIWPF
         }
         public void ConsoleLog()
         {
-            //Thread.Sleep(TimeSpan.FromSeconds(0.5));
-            System.Diagnostics.Debug.WriteLine("CONSOLE LOG()");
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                System.Diagnostics.Debug.WriteLine("DISPATCHER()");
                 if (LineWriter.notRead())
                 {
                     for (int i = 0; i < LineWriter.console.Count; i++)
@@ -109,6 +107,23 @@ namespace UIWPF
             Program.Process();
             console = new Thread(ConsoleLog);
             console.Start();
+        }
+
+        private void SVGPATHDATA_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            /*if (File.Exists(SVGPATHDATA.Text))
+            {
+                BitmapImage image = new BitmapImage();
+                image.BeginInit();
+                image.UriSource = new Uri(SVGPATHDATA.Text);
+                image.EndInit();
+                CanvasDisplayImage.Source = image;
+            }*/
+        }
+
+        private void CONSOLE_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }

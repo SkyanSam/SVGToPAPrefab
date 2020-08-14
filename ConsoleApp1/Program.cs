@@ -35,22 +35,19 @@ namespace SVGToPrefab
         }
         public static void Process()
         {
-
-            // XML -> JSON
-            string jStr = XMLToJSON(Input.svgPath);
-
-            // JSON -> GameObjectData[] {Custom Class}
+            // XML -> GameObjectData[] {Custom Class}
             List<GameObjectData> gameObjectDataList;
             List<PathOutline> pathOutlineList;
-            JSONToGameObjectData(jStr, out gameObjectDataList, out pathOutlineList);
-            foreach (var data in gameObjectDataList) LineWriter.WriteLine(((GameObjectData)data).ToString());
-            foreach (var outline in pathOutlineList) if (((PathOutline)outline) != null) LineWriter.WriteLine(((PathOutline)outline).ToString());
+            XMLToGameObjectData(Input.svgPath, out gameObjectDataList, out pathOutlineList);
+            foreach (var data in gameObjectDataList) LineWriter.WriteLine(data.ToString());
+            foreach (var outline in pathOutlineList) if (outline != null) LineWriter.WriteLine(outline.ToString());
+
             // GameObjectData[] -> GameObject[]
             List<GameObject> gameObjectsList = new List<GameObject>();
 
             ApplyGameObjectDatasToGameObjectList(gameObjectDataList, ref gameObjectsList);
-            ApplyGameObjectDatasToGameObjectList (
-                ConvertPathOutlinesToGameObjectDatas(pathOutlineList), ref gameObjectsList );
+            ApplyGameObjectDatasToGameObjectList(
+                ConvertPathOutlinesToGameObjectDatas(pathOutlineList), ref gameObjectsList);
 
             GameObject[] objects = gameObjectsList.ToArray();
 
@@ -70,122 +67,53 @@ namespace SVGToPrefab
             pb.Export(Input.prefabPath);
 
         }
-        static string XMLToJSON(string _path)
-        {
-            string xml = File.ReadAllText(_path);
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xml);
-            string jsonTxt = JsonConvert.SerializeXmlNode(doc);
-            return jsonTxt;
-            
-        }
-        static void JSONToGameObjectData(string json, out List<GameObjectData> gameObjectsData, out List<PathOutline> pathOutlinesData)
+        static void XMLToGameObjectData(string _path, out List<GameObjectData> gameObjectsData, out List<PathOutline> pathOutlinesData)
         {
             gameObjectsData = new List<GameObjectData>();
             pathOutlinesData = new List<PathOutline>();
-            int cItem = -1; // current Item
-            string currentType = "";
-            bool objectStarted = false;
 
-            ArrayList tokenTypes = new ArrayList(); //TokenType
-            ArrayList valueTypes = new ArrayList(); //Type?
-            ArrayList values = new ArrayList(); //Object?
+            string xml = File.ReadAllText(_path);
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+            var nodes = doc.LastChild.ChildNodes;
 
-            // Creating List
-            using (var reader = new JsonTextReader(new StringReader(json)))
+            for (int i = 0; i < nodes.Count; i++)
+                if (nodes.Item(i).Name == "g") nodes = nodes.Item(i).ChildNodes;
+
+            for (int i = 0; i < nodes.Count; i++)
             {
-                while (reader.Read())
+                var item = nodes.Item(i);
+                if (isTypeConvertableToPAObject(item.Name))
                 {
-                    tokenTypes.Add(reader.TokenType);
-                    valueTypes.Add(reader.ValueType);
-                    values.Add(reader.Value);
-                    Console.WriteLine("{0} - {1} - {2}", reader.TokenType, reader.ValueType, reader.Value);
-                } 
-            }
+                    var attributes = nodes.Item(i).Attributes;
 
-            // Analyzing List
-            for (int i = 0; i < values.Count; i++)
-            {
-
-                var value = (string)values[i];
-                if (isTypeConvertableToPAObject(value))
-                    currentType = value;
-
-                if (!objectStarted && tokenTypes[i].ToString() == "StartObject")
-                {
-                    objectStarted = true;
-                    float[] offsetVect = GetVarFromValue.Offset(currentType);
+                    float[] offsetVect = GetVarFromShapeName.Offset(item.Name);
                     gameObjectsData.Add(new GameObjectData()
                     {
                         ID = GenerateID(999),
-                        shape = GetVarFromValue.Shape(currentType),
+                        shape = GetVarFromShapeName.Shape(item.Name),
                         offsetX = offsetVect[0],
                         offsetY = offsetVect[1]
                     });
-                    pathOutlinesData.Add(null);
-                    
-                    LineWriter.WriteLine("NEW OBJECT!! type:{" + currentType + "}, objectstarted:{ " + objectStarted + "}");
+                    if (nodes.Item(i).Name == "path") pathOutlinesData.Add(new PathOutline());
+                    else pathOutlinesData.Add(null);
 
-                    cItem += 1;
-                    if (currentType == "line") pathOutlinesData[cItem] = new PathOutline();
-
-                    LineWriter.WriteLine("CITEM: " + cItem);
-                }
-
-
-                if (currentType != "" && objectStarted)
-                {
-                    // Initializing Object Data
-                    string nextVal = (string)values[i + 1];
-                    if (nextVal != null)
+                    GameObjectData obj = gameObjectsData[i];
+                    PathOutline pO = pathOutlinesData[i];
+                    for (int a = 0; a < attributes.Count; a++)
                     {
-                        GameObjectData obj = gameObjectsData[cItem];
-                        PathOutline pO = pathOutlinesData[cItem];
-                        float nextValf = 0.0f;
-                        int j;
-
-                        // This is to see if the item is any of the following cases to see if the nextVal is a float or not.
-                        if (IsItemIsInArray(value, GameObjectData.varLabels, out j)) nextValf = float.Parse(nextVal) * Input.sizeMultiplier;
-
-                        // Different Objects
-                        DataAppliers.ApplyThisVal(ref obj, ref pO, value, nextVal, nextValf);
-                        gameObjectsData[cItem] = obj;
-                        pathOutlinesData[cItem] = pO;
+                        LineWriter.WriteLine(attributes.Item(a).Name + ", " + attributes.Item(a).Value);
+                        float valuef = IsItemIsInArray(attributes.Item(a).Name, GameObjectData.varLabels) ? float.Parse(attributes.Item(a).Value) : 0;
+                        DataAppliers.ApplyThisAttributeValue(ref obj, ref pO, attributes.Item(a).Name, attributes.Item(a).Value, valuef);
                     }
+                    gameObjectsData[i] = obj;
+                    pathOutlinesData[i] = pO;
+
+                    if (gameObjectsData[i].shape == null)
+                        gameObjectsData[i].shape = GetVarFromShapeName.Shape(item.Name);
                 }
-
-                if (objectStarted && tokenTypes[i].ToString() == "EndObject")
-                {
-                    var thisObj = (GameObjectData)gameObjectsData[cItem];
-                    if (thisObj.shape == null)
-                    {
-                        thisObj.shape = GetVarFromValue.Shape(currentType);
-                        float[] offsetVect = GetVarFromValue.Offset(currentType);
-                        thisObj.offsetX = offsetVect[0];
-                        thisObj.offsetY = offsetVect[1];
-                        LineWriter.WriteLine("OFFEST IS BEING CALLED");
-                    }
-                    gameObjectsData[cItem] = thisObj;
-
-
-                    // We're not resetting current type because of JSON output.
-                    objectStarted = false;
-                    LineWriter.WriteLine("END OBJECT!! type:{" + currentType + "}, objectstarted:{ " + objectStarted + "}");
-                }
+                LineWriter.WriteLine("NEW OBJECT!! type:{" + item.Name + "}" + i);
             }
-
-            // Converting Path Outline to GameObjects.
-
-            /*
-            for (int i = 0; i < pathOutlinesData.Count; i++)
-            {
-                if (pathOutlinesData[i] as PathOutline != null)
-                {
-                    GameObjectData[] pathobjs = (pathOutlinesData[i] as PathOutline).ToObjs();
-                    for (int g = 0; g < pathobjs.Length; i++) gameObjectsData.Add(pathobjs[i]);
-                }
-            }
-            */
         }
         public static void ApplyGameObjectDatasToGameObjectList(List<GameObjectData> GameObjectDataList, ref List<GameObject> GameObjectList)
         {
@@ -248,7 +176,7 @@ namespace SVGToPrefab
             for (int i = 0; i < array.Length; i++) if (item == array[i]) return true;
             return false;
         }
-        public struct GetVarFromValue
+        public struct GetVarFromShapeName
         {
             public static Shapes? Shape(string value)
             {
