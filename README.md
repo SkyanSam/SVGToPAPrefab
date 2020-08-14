@@ -18,7 +18,7 @@ A lot of the documentation is in ``<summary></summary>`` above the various class
 ConsoleApp1.proj contains the actual converter  
 UIWPF.proj is just an addon to ConsoleApp1 as the user interface.  
 Input.cs contains all the input variables  
-GameObjectData.cs is intended to hold classes that will be compiled to GameObjects later on {GameObjectData, PathOutline,   
+GameObjectData.cs is intended to hold classes that will be compiled to GameObjects later on {GameObjectData, PathOutline, PathArea, etc.. } 
 DataAppliers.cs is intended to apply attribute values to GameObjectDatas {@d, @x, @y, @width, etc.. }   
 LineWriter.cs is used for debugging  
 You may also use the PAPrefabBuilders documentation for classes such as GameObject.  
