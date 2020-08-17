@@ -40,16 +40,10 @@ namespace SVGToPrefab
             List<PathOutline> pathOutlineList;
             XMLToGameObjectData(Input.svgPath, out gameObjectDataList, out pathOutlineList);
             foreach (var data in gameObjectDataList) LineWriter.WriteLine(data.ToString());
-            foreach (var outline in pathOutlineList) if (outline != null) LineWriter.WriteLine(outline.ToString());
 
             // GameObjectData[] -> GameObject[]
-            List<GameObject> gameObjectsList = new List<GameObject>();
-
-            ApplyGameObjectDatasToGameObjectList(gameObjectDataList, ref gameObjectsList);
-            ApplyGameObjectDatasToGameObjectList(
-                ConvertPathOutlinesToGameObjectDatas(pathOutlineList), ref gameObjectsList);
-
-            GameObject[] objects = gameObjectsList.ToArray();
+            foreach (var pathOutline in pathOutlineList) if (pathOutline != null) pathOutline.AddToList(ref gameObjectDataList);
+            GameObject[] objects = gameObjectDataList.ToArray<GameObject>();
 
             // GameObject[] -> Prefab!
             PrefabBuilder pb = new PrefabBuilder(Input.prefabName, Input.prefabType, 0);
@@ -57,12 +51,11 @@ namespace SVGToPrefab
             {
                 if (objects[i] != null)
                 {
-                    objects[i].Bin = i; // This may be a problem if I > 14.
-                    // (objects[i].renderDistance) need to add render distance.
+                    objects[i].Bin = i;
+                    objects[i].Depth = 30 - i > -1 ? 30 - i : 0;
                     pb.Objects.Add(objects[i]);
                 }
             }
-
             // Prefab -> Project Arrythmia!!
             pb.Export(Input.prefabPath);
 
@@ -86,14 +79,13 @@ namespace SVGToPrefab
                 if (isTypeConvertableToPAObject(item.Name))
                 {
                     var attributes = nodes.Item(i).Attributes;
-
-                    float[] offsetVect = GetVarFromShapeName.Offset(item.Name);
+                    bool isShapeNull = false;
                     gameObjectsData.Add(new GameObjectData()
                     {
-                        ID = GenerateID(999),
-                        shape = GetVarFromShapeName.Shape(item.Name),
-                        offsetX = offsetVect[0],
-                        offsetY = offsetVect[1]
+                        ID = GenerateID(999).ToString(),
+                        Shape = GetVarFromShapeName.Shape(item.Name, out isShapeNull),
+                        offset = GetVarFromShapeName.Offset(item.Name),
+                        isShapeUnknown = isShapeNull
                     });
                     if (nodes.Item(i).Name == "path") pathOutlinesData.Add(new PathOutline());
                     else pathOutlinesData.Add(null);
@@ -103,43 +95,14 @@ namespace SVGToPrefab
                     for (int a = 0; a < attributes.Count; a++)
                     {
                         LineWriter.WriteLine(attributes.Item(a).Name + ", " + attributes.Item(a).Value);
-                        float valuef = IsItemIsInArray(attributes.Item(a).Name, GameObjectData.varLabels) ? float.Parse(attributes.Item(a).Value) : 0;
+                        float valuef = GameObjectData.IsFloatAttribute(attributes.Item(a).Value) ? float.Parse(attributes.Item(a).Value) : 0;
                         DataAppliers.ApplyThisAttributeValue(ref obj, ref pO, attributes.Item(a).Name, attributes.Item(a).Value, valuef);
                     }
                     gameObjectsData[i] = obj;
                     pathOutlinesData[i] = pO;
-
-                    if (gameObjectsData[i].shape == null)
-                        gameObjectsData[i].shape = GetVarFromShapeName.Shape(item.Name);
                 }
                 LineWriter.WriteLine("NEW OBJECT!! type:{" + item.Name + "}" + i);
             }
-        }
-        public static void ApplyGameObjectDatasToGameObjectList(List<GameObjectData> GameObjectDataList, ref List<GameObject> GameObjectList)
-        {
-            for (int i = 0; i < GameObjectDataList.Count; i++)
-                if (GameObjectDataList[i].shape != null) // We don't want to add a shape we can't even determine!
-                    GameObjectList.Add(GameObjectDataList[i].ToObj());
-        }
-        public static List<GameObjectData> ConvertPathOutlinesToGameObjectDatas(List<PathOutline> pathOutlines)
-        {
-            // Clears any null objects
-            for (int i = 0; i < pathOutlines.Count; i++)
-                if (pathOutlines[i] == null)
-                    pathOutlines.RemoveAt(i);
-
-            List<GameObjectData> gameObjectDatas = new List<GameObjectData>();
-            for (int i = 0; i < pathOutlines.Count; i++)
-            {
-                if (pathOutlines[i] != null)
-                {
-                    GameObjectData[] tempPathOutlineObjs = pathOutlines[i].ToObjs();
-                    foreach (GameObjectData data in tempPathOutlineObjs)
-                        gameObjectDatas.Add(data);
-                }
-            }
-            return gameObjectDatas;
-
         }
         public static int GenerateID(int maxNum)
         {
@@ -178,29 +141,25 @@ namespace SVGToPrefab
         }
         public struct GetVarFromShapeName
         {
-            public static Shapes? Shape(string value)
+            public static Shapes Shape(string value, out bool isNull)
             {
-                switch (value)
-                {
-                    case "rect":
-                        return Shapes.Square;
-                    case "circle":
-                        return Shapes.Circle;
-                    case "ellipse":
-                        return Shapes.Circle;
+                isNull = false;
+                switch (value) {
+                    case "rect": return Shapes.Square;
+                    case "circle": case "ellipse": return Shapes.Circle;
+                    default: isNull = true; return Shapes.Arrow;
                 }
-                return null;
             }
-            public static float[] Offset(string value)
+            public static Vector2 Offset(string value)
             {
-                // Center Pivot
-                if (IsItemIsInArray(value, new string[] { "circle", "ellipse", "path" }))
-                    return new float[] { 0f, 0f };
-
-                // Top Right Pivot
-                else
-                    return new float[] { 0.5f, -0.5f };
-
+                switch (value) {
+                    case "circle":
+                    case "ellipse":
+                    case "path":
+                        return Vector2.Zero; // Center Pivot
+                    default:
+                        return new Vector2(0.5f, -0.5f); // Top Right Pivot
+                }
             }
         }
         

@@ -20,7 +20,7 @@ namespace SVGToPrefab
                 D(ref obj, nextVal, out shape);
                 if (shape == null) Multi.PathOutline(ref pO, nextVal);
             }
-            if (shape != null) obj.shape = shape.Value;
+            if (shape != null) obj.Shape = shape.Value;
             switch (value) {
                 case "x": case "cx": X(ref obj, nextValf); break;
                 case "y": case "cy": Y(ref obj, nextValf); break;
@@ -71,7 +71,7 @@ namespace SVGToPrefab
             bool isRightTriangle;
             CustomMath.Rotations.GetRotatedShape(1f, CustomConversions.Float2ToVect(center), points, out finalPoints, out finalRotation, out isRightTriangle);
 
-            if (isRightTriangle && points.Length == 3) obj.shapeVariant = 2;
+            if (isRightTriangle && points.Length == 3) obj.ShapeVariant = 2;
 
             float[] finalXPoints = CustomConversions.VectIndexToFloatList(0, finalPoints); 
             float[] finalYPoints = CustomConversions.VectIndexToFloatList(1, finalPoints);
@@ -88,10 +88,14 @@ namespace SVGToPrefab
             LineWriter.WriteLine(finalSize[1]);
 
             // Apply center and size
-            obj.positionX = center[0];
-            obj.positionY = center[1];
-            obj.sizeX = finalSize[0] * SizeMultiplier;
-            obj.sizeY = finalSize[1] * SizeMultiplier;
+            obj.position = new Vector2(
+                center[0],
+                center[1]
+            );
+            obj.size = new Vector2(
+                finalSize[0] * SizeMultiplier,
+                finalSize[1] * SizeMultiplier
+            );
             obj.rotAngle = finalRotation;
         }
         public static void X(ref GameObjectData obj, float nextValf)
@@ -128,7 +132,7 @@ namespace SVGToPrefab
         }
         public static void stroke(ref GameObjectData obj)
         {
-            obj.shapeVariant = 1;
+            obj.ShapeVariant = 1;
         }
         public static void strokeWidth(ref PathOutline pO, float nextValf)
         {
@@ -157,10 +161,9 @@ namespace SVGToPrefab
                 CustomConversions.GetVarsFromMatrix(matrix, out posXdelta, out posYdelta, out sizeX, out sizeY, out rotation);
 
                 // Consider making the offset center and push everything by 0.5?
-                obj.offsetX = 0; 
-                obj.offsetY = 0;
+                obj.offset = Vector2.Zero;
                 //
-                obj.positionX += 0.5f;
+                obj.position += new Vector2(0.5f, 0);
                 obj.rotAngle = rotation;
                 
             } else if (vals[0] == "rotate")
