@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ConsoleApp1\SVGToPrefab.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="PrefabBuilder">
+      <HintPath>..\..\..\..\PrefabBuilder.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

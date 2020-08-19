@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SVGToPrefab", "ConsoleApp1\SVGToPrefab.csproj", "{2A5A9EFA-6E4E-4E9B-B7B3-2245CCBA727B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIWPF", "UIWPF\UIWPF.csproj", "{FCD6445C-A7FB-4C74-8C8A-07ECCE8CBCCD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2A5A9EFA-6E4E-4E9B-B7B3-2245CCBA727B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A5A9EFA-6E4E-4E9B-B7B3-2245CCBA727B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A5A9EFA-6E4E-4E9B-B7B3-2245CCBA727B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A5A9EFA-6E4E-4E9B-B7B3-2245CCBA727B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCD6445C-A7FB-4C74-8C8A-07ECCE8CBCCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCD6445C-A7FB-4C74-8C8A-07ECCE8CBCCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCD6445C-A7FB-4C74-8C8A-07ECCE8CBCCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCD6445C-A7FB-4C74-8C8A-07ECCE8CBCCD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5C9F657E-455F-475E-94CB-1137AFC20C53}
+	EndGlobalSection
+EndGlobal
