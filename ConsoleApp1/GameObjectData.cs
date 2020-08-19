@@ -84,9 +84,8 @@ namespace SVGToPrefab
         public override string ToString()
         {
             return (
-                base.ToString() + "{{" +
-                "id: " + ID + ", " +
-                "posX: " + position.X + ", " +
+                base.ToString() + $"[[id: { ID }, posX: {position.X}"
+                 + ", " +
                 "posY: " + position.Y + ", " +
                 "sizeX: " + size.X + ", " +
                 "sizeY: " + size.Y + ", " +
@@ -120,6 +119,7 @@ namespace SVGToPrefab
         public Vector2[] points = new Vector2[2] { new Vector2(), new Vector2() };
         public int colorNum = 0;
         public float outlineSize { get; set; } = 1;
+        public PathOutline() { }
         public void AddToList(ref List<GameObjectData> list)
         {
             LineWriter.WriteLine("START PATH OUTLINE {{{{");
@@ -146,6 +146,7 @@ namespace SVGToPrefab
                     new Vector2(nextpoint.X, -nextpoint.Y)
                 );
                 obj.offset = new Vector2(0.5f, 0);
+                obj.isShapeUnknown = false;
                 list.Add(obj);
                 LineWriter.WriteLine(obj.ToString());
             };

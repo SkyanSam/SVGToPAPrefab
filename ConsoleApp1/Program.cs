@@ -39,10 +39,16 @@ namespace SVGToPrefab
             List<GameObjectData> gameObjectDataList;
             List<PathOutline> pathOutlineList;
             XMLToGameObjectData(Input.svgPath, out gameObjectDataList, out pathOutlineList);
-            foreach (var data in gameObjectDataList) LineWriter.WriteLine(data.ToString());
 
-            // GameObjectData[] -> GameObject[]
+            foreach (var data in gameObjectDataList) LineWriter.WriteLine(data.ToString());
             foreach (var pathOutline in pathOutlineList) if (pathOutline != null) pathOutline.AddToList(ref gameObjectDataList);
+            
+            for (int i = 0; i < gameObjectDataList.Count; i++) {
+                if (gameObjectDataList[i].isShapeUnknown) {
+                    gameObjectDataList.RemoveAt(i);
+                    i--;
+            }}
+            // GameObjectData[] -> GameObject[]
             GameObject[] objects = gameObjectDataList.ToArray<GameObject>();
 
             // GameObject[] -> Prefab!
@@ -79,7 +85,7 @@ namespace SVGToPrefab
                 if (isTypeConvertableToPAObject(item.Name))
                 {
                     var attributes = nodes.Item(i).Attributes;
-                    bool isShapeNull = false;
+                    bool isShapeNull;
                     gameObjectsData.Add(new GameObjectData()
                     {
                         ID = GenerateID(999).ToString(),

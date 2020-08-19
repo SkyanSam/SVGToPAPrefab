@@ -13,28 +13,30 @@ namespace SVGToPrefab
     /// </summary>
     class DataAppliers
     {
-        public static void ApplyThisAttributeValue(ref GameObjectData obj, ref PathOutline pO, string value, string nextVal, float nextValf)
+        public static void ApplyThisAttributeValue(ref GameObjectData obj, ref PathOutline pO, string attribute, string value, float valueFloat)
         {
             Shapes? shape = null;
-            if (value == "d") {
-                D(ref obj, nextVal, out shape);
-                if (shape == null) Multi.PathOutline(ref pO, nextVal);
+            if (attribute == "d") {
+                D(ref obj, value, out shape);
+                if (shape == null) Multi.PathOutline(ref pO, value);
             }
             if (shape != null) obj.Shape = shape.Value;
-            switch (value) {
-                case "x": case "cx": X(ref obj, nextValf); break;
-                case "y": case "cy": Y(ref obj, nextValf); break;
-                case "width": case "rx": sizeX(ref obj, nextValf, value); break;
-                case "height": case "ry": sizeY(ref obj, nextValf, value); break;
-                case "transform": translate(ref obj, nextVal); break;
-                case "r": size(ref obj, nextValf); break;
-                case "stroke": fill(ref obj, nextVal); stroke(ref obj); break;
-                case "stroke-width": strokeWidth(ref pO, nextValf); break;
-                case "fill": fill(ref obj, nextVal); break;
-                case "x1": x1(ref pO, nextValf); break;
-                case "x2": x2(ref pO, nextValf); break;
-                case "y1": y1(ref pO, nextValf); break;
-                case "y2": y2(ref pO, nextValf); break;
+            switch (attribute) {
+                case "x": case "cx": X(ref obj, valueFloat); break;
+                case "y": case "cy": Y(ref obj, valueFloat); break;
+                case "width": case "rx": sizeX(ref obj, valueFloat, attribute); break;
+                case "height": case "ry": sizeY(ref obj, valueFloat, attribute); break;
+                case "transform": translate(ref obj, value); break;
+                case "r": size(ref obj, valueFloat); break;
+                case "stroke": fill(ref obj, value); stroke(ref obj); break;
+                case "stroke-width": strokeWidth(ref pO, valueFloat); break;
+                case "fill": fill(ref obj, value); break;
+                case "x1": x1(ref pO, valueFloat); break;
+                case "x2": x2(ref pO, valueFloat); break;
+                case "y1": y1(ref pO, valueFloat); break;
+                case "y2": y2(ref pO, valueFloat); break;
+                case "points": points(ref pO, value); break;
+                case "style": style(ref obj, ref pO, value); break;
             }
         }
         public static void D(ref GameObjectData obj, string nextVal, out Shapes? shape)
@@ -71,7 +73,11 @@ namespace SVGToPrefab
             bool isRightTriangle;
             CustomMath.Rotations.GetRotatedShape(1f, CustomConversions.Float2ToVect(center), points, out finalPoints, out finalRotation, out isRightTriangle);
 
-            if (isRightTriangle && points.Length == 3) obj.ShapeVariant = 2;
+            if (isRightTriangle && points.Length == 3)
+            {
+                obj.isRightTriangle = true;
+                obj.ShapeVariant = 2;
+            }
 
             float[] finalXPoints = CustomConversions.VectIndexToFloatList(0, finalPoints); 
             float[] finalYPoints = CustomConversions.VectIndexToFloatList(1, finalPoints);
@@ -106,16 +112,16 @@ namespace SVGToPrefab
         {
             obj.positionY = nextValf;
         }
-        public static void sizeX(ref GameObjectData obj, float nextValf, string value)
+        public static void sizeX(ref GameObjectData obj, float nextValf, string attribute)
         {
             int multiplier = 1;
-            if (value == "rx") multiplier = 2; // If this is an ellipse we want twice as much
+            if (attribute == "rx") multiplier = 2; // If this is an ellipse we want twice as much
             obj.sizeX = nextValf * multiplier;
         }
-        public static void sizeY(ref GameObjectData obj, float nextValf, string value)
+        public static void sizeY(ref GameObjectData obj, float nextValf, string attribute)
         {
             int multiplier = 1;
-            if (value == "ry") multiplier = 2; // If this is an ellipse we want twice as much
+            if (attribute == "ry") multiplier = 2; // If this is an ellipse we want twice as much
             obj.sizeY = nextValf * multiplier;
         }
         public static void size(ref GameObjectData obj, float nextValf)
@@ -129,19 +135,24 @@ namespace SVGToPrefab
             {
                 obj.colorNum = id; // Affirmative, colors count from 0.
             }
+            obj.isAreaFilled = true;
         }
         public static void stroke(ref GameObjectData obj)
         {
             obj.ShapeVariant = 1;
+            obj.isPerimeterOutlined = true;
         }
         public static void strokeWidth(ref PathOutline pO, float nextValf)
         {
             if (pO != null) pO.outlineSize = nextValf;
         }
-        public static void rotation(ref GameObjectData obj, float nextValf)
+        public static void style(ref GameObjectData obj, ref PathOutline pO, string nextVal)
         {
-            obj.rotAngle = nextValf;
+            string[] split = nextVal.Split(';', ':');
+            for (int i = 0; i < split.Length; i += 2)
+                ApplyThisAttributeValue(ref obj, ref pO, split[i], split[i + 1], 0f);
         }
+        public static void rotation(ref GameObjectData obj, float nextValf) => obj.rotAngle = nextValf;
         public static void translate(ref GameObjectData obj, string nextVal)
         {
             string[] vals = nextVal.Split('(', ')', ','); // Questioning if i should split for empty spaces..
@@ -171,25 +182,34 @@ namespace SVGToPrefab
                 obj.rotAngle = float.Parse(vals[1]);
             }
         }
-        public static void x1(ref PathOutline p0, float nextValf)
+        public static void x1(ref PathOutline pO, float nextValf)
         {
-            if (p0 == null) p0 = new PathOutline();
-            p0.points[0].X = nextValf;
+            if (pO == null) pO = new PathOutline();
+            pO.points[0].X = nextValf;
         }
-        public static void x2(ref PathOutline p0, float nextValf)
+        public static void x2(ref PathOutline pO, float nextValf)
         {
-            if (p0 == null) p0 = new PathOutline();
-            p0.points[1].X = nextValf;
+            if (pO == null) pO = new PathOutline();
+            pO.points[1].X = nextValf;
         }
-        public static void y1(ref PathOutline p0, float nextValf)
+        public static void y1(ref PathOutline pO, float nextValf)
         {
-            if (p0 == null) p0 = new PathOutline();
-            p0.points[0].Y = nextValf;
+            if (pO == null) pO = new PathOutline();
+            pO.points[0].Y = nextValf;
         }
-        public static void y2(ref PathOutline p0, float nextValf)
+        public static void y2(ref PathOutline pO, float nextValf)
         {
-            if (p0 == null) p0 = new PathOutline();
-            p0.points[1].Y = nextValf;
+            if (pO == null) pO = new PathOutline();
+            pO.points[1].Y = nextValf;
+        }
+        public static void points(ref PathOutline pO, string nextVal)
+        {
+            string[] pointsStr = nextVal.Split(' ', ',');
+            Vector2[] points = new Vector2[pointsStr.Length / 2];
+            for (int i = 0; i < pointsStr.Length / 2; i++)
+                points[i] = new Vector2( float.Parse(pointsStr[i * 2]) , float.Parse(pointsStr[(i * 2) + 1]));
+            if (pO == null) pO = new PathOutline();
+            pO.points = points;
         }
         struct Multi { 
             public static void PathOutline(ref PathOutline obj, string nextVal)
@@ -201,7 +221,6 @@ namespace SVGToPrefab
                 CustomConversions.DPathToPoints(nextVal, out xArray, out yArray, out points);
                 obj.points = points;
             }
-        
         }
 
     }
