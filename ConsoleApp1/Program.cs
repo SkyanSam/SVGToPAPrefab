@@ -29,10 +29,18 @@ namespace SVGToPrefab
     }
     class Program
     {
+        // External Objects are used when an object is made up of multiple gameObjectData's that dont fit with PathOutline or PathArea.
+        // Example: Matrixes
+        static List<GameObjectData> externalGameObjectDatas;
+        public static void AddExternalGameObjectData(GameObjectData data) {
+            externalGameObjectDatas.Add(data); }
+        //
+
         static void Main(string[] args)
         {
 
         }
+        
         public static void Process()
         {
             // XML -> GameObjectData[] {Custom Class}
@@ -48,6 +56,7 @@ namespace SVGToPrefab
                     gameObjectDataList.RemoveAt(i);
                     i--;
             }}
+            foreach (var data in externalGameObjectDatas) gameObjectDataList.Add(data); // External GameObjects
             // GameObjectData[] -> GameObject[]
             GameObject[] objects = gameObjectDataList.ToArray<GameObject>();
 
@@ -96,8 +105,8 @@ namespace SVGToPrefab
                     if (nodes.Item(i).Name == "path") pathOutlinesData.Add(new PathOutline());
                     else pathOutlinesData.Add(null);
 
-                    GameObjectData obj = gameObjectsData[i];
-                    PathOutline pO = pathOutlinesData[i];
+                    GameObjectData obj = gameObjectsData[gameObjectsData.Count - 1];
+                    PathOutline pO = pathOutlinesData[pathOutlinesData.Count - 1];
                     for (int a = 0; a < attributes.Count; a++)
                     {
                         LineWriter.WriteLine(attributes.Item(a).Name + ", " + attributes.Item(a).Value);

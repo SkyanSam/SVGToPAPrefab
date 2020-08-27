@@ -25,15 +25,12 @@ namespace SVGToPrefab.Custom
 
             return rFloatArray;
         }
-        public static void GetVarsFromMatrix(float[] matrix, out float posXdelta, out float posYdelta, out float sizeX, out float sizeY, out float rot)
+        public static void GetVarsFromMatrix(float[] matrix, out Vector2 posDelta, out Vector2 size, out Vector2 skew)
         {
-            posXdelta = matrix[4];
-            posYdelta = matrix[5];
-            sizeX = matrix[0];
-            sizeY = matrix[3];
-            //var skewX = matrix[1];
-            var skewY = matrix[2];
-            rot = MathF.Asin(skewY) * 180 / MathF.PI;
+            posDelta = new Vector2(matrix[4], matrix[5]);
+            size = new Vector2(matrix[0], matrix[3]);
+            skew = new Vector2(matrix[1], matrix[2]);
+            //rot = MathF.Asin(skewY) * 180 / MathF.PI;
         }
         /// <summary>
         /// Specifically for converting the @D attribute to points on the path

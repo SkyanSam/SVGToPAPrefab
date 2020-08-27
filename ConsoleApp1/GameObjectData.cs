@@ -77,6 +77,8 @@ namespace SVGToPrefab
             Name = "Obj " + ID + " " + Shape;
             AddEvent(EventType.col, Input.secondsToLast, colorNum, null, Easing.Linear);
         }
+        public void MakeParent(string ID) { Parent = ID; }
+        public void MakeParent(GameObjectData obj) { Parent = obj.ID; }
         public void Conclude()
         {
             Name = "Obj " + ID + " " + Shape;

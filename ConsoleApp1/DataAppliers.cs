@@ -164,19 +164,28 @@ namespace SVGToPrefab
                 {
                     matrix[i - 1] = float.Parse(vals[i]);
                 }
-                float posXdelta;
-                float posYdelta;
-                float sizeX; // Not valid at this point I think
-                float sizeY; // Not valid at this point I think
-                float rotation;
-                CustomConversions.GetVarsFromMatrix(matrix, out posXdelta, out posYdelta, out sizeX, out sizeY, out rotation);
+                Vector2 posDelta, size, skew = Vector2.Zero;
+                CustomConversions.GetVarsFromMatrix(matrix, out posDelta, out size, out skew);
+                //float rotation;
+
+                
 
                 // Consider making the offset center and push everything by 0.5?
                 obj.offset = Vector2.Zero;
                 //
                 obj.position += new Vector2(0.5f, 0);
-                obj.rotAngle = rotation;
+                obj.rotAngle = -45;
                 
+                // This parent rotates the object correctly depending on its skew value
+                var parent = new GameObjectData();
+                parent.size = new Vector2(skew.X / 90f, skew.Y / 90f);
+                parent.rotAngle = CustomMath.Matrix.GetRotationDegFromSkewDeg(skew.X > skew.Y ? skew.X : skew.Y);
+                // This parent flips the object on axis if needed.
+                parent.MakeParent(new GameObjectData() {
+                    sizeX = size.X < 0? -1 : 1,
+                    sizeY = size.Y < 0? -1 : 1
+                });
+                obj.MakeParent(parent);
             } else if (vals[0] == "rotate")
             {
                 obj.rotAngle = float.Parse(vals[1]);

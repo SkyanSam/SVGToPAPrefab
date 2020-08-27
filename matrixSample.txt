@@ -1,0 +1,57 @@
+New Sprite [rot 45] parent [rot -33.333, scale (1.5, 1) ] skewed to the left
+
+11.667 diff
+
+New Sprite [rot 45] parent [rot -45, scale (1,1) ] normal
+
+11.6 diff
+
+New Sprite [rot 45] parent [rot -56.6, scale (1, 1.5)] skewed to the right
+
+Equation time?
+
+Function SCALE(1,2) -> ROT(-67.5)
+Manual SCALE(1,2) -> ROT(-63.333)
+
+x = 6.733
+x * 1.723 = 11.6
+x * 2.723 = 18.333
+x * 3.723 = 25.0669
+
+MANUALLY IT SHOULD BE -71.5 for 3.723
+
+
+---
+rotation: 6, scaleX: 10, :
+
+rotation: 11.3, scaleX: 5
+
+rotation: 12.5, scaleX, 4.5 :
+
+rotation: 14, scaleX: 4, :
+c2
+rotation: 16, scaleX: 3.5, :
+c2.5
+rotation: 18.5, scaleX: 3, :
+c3.5
+rotation: 22, scaleX: 2.5, :
+c4.5
+rotation: 26.5, scaleX: 2, :
+c7.5
+rotation: 34, scaleX: 1.5 :
+
+
+
+----
+0, 90
+0.1, 84.2
+0.2, 78.8
+0.3, 73.3333
+0.4, 68.3333
+0.5, 63.3333
+0.6, 59
+0.7, 55
+0.8, 51.4
+0.9, 48
+1, 45
+

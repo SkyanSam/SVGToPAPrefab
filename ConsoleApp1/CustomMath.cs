@@ -174,6 +174,19 @@ namespace SVGToPrefab.Custom
                 for (int v = 0; v < points.Length; v++) points[v] += CustomConversions.Float2ToVect(finalCenter); // Adding back the diff.
             }
         }
+        public struct Matrix
+        {
+            /// <summary>
+            /// Will take a skew value and return it into a rotation.
+            /// </summary>
+            /// <param name="skewDeg">The skew value, 0-90</param>
+            /// <returns></returns>
+            public static float GetRotationDegFromSkewDeg(float skewDeg)
+            {
+                float x = skewDeg / 90f;
+                return (-45*x) + 90 - (9*(-MathF.Abs(x - 0.5f) + 0.5f));
+            }
+        }
 
     }
 }
